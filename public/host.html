@@ -227,19 +227,10 @@ function render(){
   }
 }
 function showLb(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-lb').classList.add('active');const{players,scores}=state;const sorted=[...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));const medals=['🥇','🥈','🥉'];document.getElementById('lb-content').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-size:14px;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');}
-function showQ(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-question').classList.add('active');}
-  // Neleisti ekranui uzsnusti
-async function keepAwake(){
-  try{
-    if('wakeLock' in navigator){
-      await navigator.wakeLock.request('screen');
-    }
-  }catch(e){}
-}
+async function keepAwake(){try{if("wakeLock" in navigator){await navigator.wakeLock.request("screen");}}catch(e){}}
 keepAwake();
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible') keepAwake();
-});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")keepAwake();});
+function showQ(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-question').classList.add('active');}
 </script>
 </body>
 </html>
