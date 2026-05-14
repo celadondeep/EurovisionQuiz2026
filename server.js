@@ -8,6 +8,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.get("/host", (req, res) => res.sendFile(path.join(__dirname, 'public', 'host.html')));
 
 // opts: array of answer strings, correct: index of correct answer
 // 2, 3, or 4 options per question - just change the opts array length
