@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eurovizija Quiz</title>
+<style>
+:root{--bg:#0d0b1a;--s:#16132a;--s2:#1e1a35;--bd:rgba(255,255,255,0.08);--pu:#7c5cfc;--pl:#a68dff;--go:#f5c842;--gr:#3ecf8e;--re:#ff5c5c;--tx:#f0eeff;--mu:rgba(240,238,255,0.45)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif}
+body{display:flex;flex-direction:column;min-height:100vh}
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex}
+
+/* header */
+.hd{padding:1.25rem 1.25rem 0;display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--pu);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0}
+.htitle{font-weight:700;font-size:17px;color:var(--tx);flex:1}
+.hbadge{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(124,92,252,.18);color:var(--pl);border:.5px solid rgba(124,92,252,.3)}
+.body{flex:1;padding:1.25rem;display:flex;flex-direction:column}
+
+/* inputs / buttons */
+.input{width:100%;padding:15px;border-radius:12px;background:var(--s2);border:.5px solid var(--bd);color:var(--tx);font-size:17px;outline:none;text-align:center;margin-bottom:12px}
+.input:focus{border-color:var(--pu)}
+.input::placeholder{color:var(--mu)}
+.btn-primary{width:100%;padding:15px;border-radius:14px;background:var(--pu);border:none;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.btn-primary:active{opacity:.8}
+.btn-primary:disabled{background:var(--s2);color:var(--mu);cursor:default}
+
+/* lobby player chips */
+.chip{background:var(--s);border:.5px solid var(--bd);border-radius:10px;padding:11px 14px;margin-bottom:7px;font-size:14px}
+.chip.me{background:rgba(124,92,252,.12);border-color:rgba(124,92,252,.35);color:var(--pl);font-weight:500}
+
+/* question */
+.qcard{background:var(--s);border:.5px solid var(--bd);border-radius:18px;padding:1.25rem;margin-bottom:1rem}
+.qnum{font-size:11px;color:var(--mu);letter-spacing:.06em;margin-bottom:.6rem;text-transform:uppercase}
+.qtext{font-size:19px;font-weight:700;line-height:1.4;color:var(--tx);margin-bottom:1.25rem}
+
+/* option buttons – layout changes based on count */
+.opts-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts-3{display:grid;grid-template-columns:1fr;gap:10px}
+.opts-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.opt{width:100%;padding:14px 12px;border-radius:14px;background:var(--s2);border:.5px solid var(--bd);color:var(--tx);font-size:14px;font-weight:600;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:64px;justify-content:center}
+.opts-3 .opt{flex-direction:row;text-align:left;min-height:52px}
+.opt:active:not(:disabled){transform:scale(.97)}
+.opt .ltr{width:28px;height:28px;border-radius:8px;background:rgba(124,92,252,.15);color:var(--pl);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opts-4 .opt .ltr{width:24px;height:24px;border-radius:7px;font-size:11px}
+.opt:hover:not(:disabled){background:#1e1b3a;border-color:rgba(124,92,252,.4)}
+.opt.selected{background:rgba(124,92,252,.18);border-color:var(--pu)}
+.opt.selected .ltr{background:var(--pu);color:#fff}
+.opt.correct{background:rgba(62,207,142,.12);border-color:rgba(62,207,142,.5)}
+.opt.correct .ltr{background:var(--gr);color:#fff}
+.opt.wrong{opacity:.55}
+.opt.wrong .ltr{background:rgba(255,92,92,.25);color:var(--re)}
+.opt:disabled{cursor:default}
+
+/* fact */
+.fact{background:rgba(124,92,252,.08);border:.5px solid rgba(124,92,252,.25);border-radius:12px;padding:12px 14px;margin-top:10px}
+.fact-l{font-size:10px;color:var(--pl);letter-spacing:.07em;margin-bottom:4px;text-transform:uppercase}
+.fact-t{font-size:13px;color:var(--tx);line-height:1.55}
+
+/* sent */
+.sent-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:1.25rem}
+.sent-card{background:rgba(62,207,142,.08);border:.5px solid rgba(62,207,142,.25);border-radius:18px;padding:2.5rem 1.5rem;text-align:center;width:100%}
+
+/* progress */
+.prog{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin:1rem 1.25rem 0;overflow:hidden}
+.prog-fill{height:100%;background:var(--pu);border-radius:2px;transition:width .4s}
+
+/* pills */
+.pills{display:flex;gap:5px;margin-bottom:1rem;overflow-x:auto;padding-bottom:2px}
+.pills::-webkit-scrollbar{display:none}
+.pill{padding:4px 10px;border-radius:20px;font-size:11px;border:.5px solid var(--bd);background:var(--s);color:var(--mu);white-space:nowrap;flex-shrink:0}
+.pill.active{background:rgba(124,92,252,.2);border-color:var(--pu);color:var(--pl)}
+.pill.done{background:rgba(62,207,142,.08);border-color:rgba(62,207,142,.3);color:var(--gr)}
+
+/* leaderboard / final */
+.lb-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;margin-bottom:7px;background:var(--s)}
+.lb-row.top{background:rgba(245,200,66,.08);border:.5px solid rgba(245,200,66,.2)}
+.lb-row.me{background:rgba(124,92,252,.1);border:.5px solid rgba(124,92,252,.3)}
+.lb-pts{font-size:20px;font-weight:700;color:var(--pl)}
+.lb-row.top .lb-pts{color:var(--go)}
+.score-big{font-size:56px;font-weight:800;color:var(--pl);text-align:center;line-height:1;margin-bottom:.25rem}
+.score-lbl{font-size:14px;color:var(--mu);text-align:center;margin-bottom:1.5rem}
+
+/* spinner */
+.spin{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--pu);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- JOIN -->
+<div id="s-join" class="screen active">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem">
+    <div class="logo" style="width:52px;height:52px;border-radius:14px;font-size:26px;margin-bottom:1.5rem">E</div>
+    <div style="font-size:24px;font-weight:700;margin-bottom:.4rem;text-align:center">Eurovizija Quiz</div>
+    <div style="font-size:14px;color:var(--mu);margin-bottom:2rem;text-align:center">Įvesk vardą ir prisijunk</div>
+    <input class="input" id="name-input" type="text" placeholder="Tavo vardas" maxlength="20" autocomplete="off" onkeyup="if(event.key==='Enter')join()">
+    <button class="btn-primary" onclick="join()">Prisijungti →</button>
+  </div>
+</div>
+
+<!-- WAIT -->
+<div id="s-wait" class="screen">
+  <div class="hd"><div class="logo">E</div><div class="htitle">Eurovizija Quiz</div><span class="hbadge">Lobby</span></div>
+  <div class="body">
+    <div style="text-align:center;padding:1.5rem 0 1.25rem">
+      <div style="font-size:40px;margin-bottom:.75rem">🎤</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:.4rem">Laukiam pradžios</div>
+      <div style="font-size:13px;color:var(--mu)">Vedėjas netrukus pradės žaidimą</div>
+    </div>
+    <div id="wait-players"></div>
+  </div>
+</div>
+
+<!-- QUESTION -->
+<div id="s-question" class="screen">
+  <div class="hd"><div class="logo">E</div><div class="htitle" id="q-rtitle">Etapas</div><span class="hbadge" id="q-badge">1/6</span></div>
+  <div class="prog"><div class="prog-fill" id="q-prog"></div></div>
+  <div class="body">
+    <div class="pills" id="q-pills"></div>
+    <div class="qcard">
+      <div class="qnum" id="q-num">Klausimas 1 / 6</div>
+      <div class="qtext" id="q-text"></div>
+      <div id="q-opts"></div>
+      <div class="fact" id="q-fact" style="display:none">
+        <div class="fact-l">Įdomu žinoti</div>
+        <div class="fact-t" id="q-fact-text"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SENT -->
+<div id="s-sent" class="screen">
+  <div class="hd"><div class="logo">E</div><div class="htitle" id="sent-title">Etapas</div><span class="hbadge" id="sent-badge">1/6</span></div>
+  <div class="sent-wrap">
+    <div class="sent-card">
+      <div style="font-size:44px;margin-bottom:.75rem">✅</div>
+      <div style="font-size:17px;font-weight:700;color:var(--gr);margin-bottom:.4rem">Atsakymas pateiktas!</div>
+      <div style="font-size:13px;color:var(--mu)">Lauk kol vedėjas atskleisti teisingą atsakymą</div>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="s-lb" class="screen">
+  <div class="hd"><div class="logo">E</div><div class="htitle">Rezultatai</div></div>
+  <div class="body">
+    <div class="score-big" id="my-score">0</div>
+    <div class="score-lbl">tavo taškai</div>
+    <div id="lb-list"></div>
+  </div>
+</div>
+
+<!-- FINAL -->
+<div id="s-final" class="screen">
+  <div class="hd"><div class="logo">E</div><div class="htitle">Finalas</div></div>
+  <div class="body">
+    <div style="text-align:center;padding:1.5rem 0 1rem" id="final-winner"></div>
+    <div id="final-lb"></div>
+  </div>
+</div>
+
+<!-- CONNECTING -->
+<div id="s-conn" class="screen">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem">
+    <div class="spin"></div>
+    <div style="color:var(--mu)">Jungiamasi...</div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const LETTERS = ['A','B','C','D'];
+let socket, myId, myName, myLastOpt = null;
+let lastRound = -1, lastQ = -1;
+
+function join() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) return;
+  myName = name;
+  setScreen('s-conn');
+  socket = io();
+  socket.on('connect', () => { myId = socket.id; socket.emit('join', { name }); });
+  socket.on('joined', ({ id }) => { myId = id; });
+  socket.on('state', handleState);
+  socket.on('disconnect', () => setScreen('s-conn'));
+}
+
+function handleState(s) {
+  const players = Object.values(s.players || {});
+  const qChanged = s.question !== lastQ || s.round !== lastRound;
+  if (qChanged) { myLastOpt = null; lastQ = s.question; lastRound = s.round; }
+
+  if (s.phase === 'lobby') {
+    setScreen('s-wait');
+    document.getElementById('wait-players').innerHTML =
+      players.map(p => `<div class="chip${p.id===myId?' me':''}">${p.name}${p.id===myId?' (tu)':''}</div>`).join('');
+    return;
+  }
+
+  if (s.phase === 'question') {
+    const myAns = s.answers?.[myId];
+    const badge = `${s.question+1}/${s.totalQuestions}`;
+    const pillsHtml = Array.from({length: s.totalRounds}, (_, i) =>
+      `<span class="pill${i===s.round?' active':i<s.round?' done':''}">${i+1} etapas</span>`).join('');
+    const prog = Math.round((s.question / s.totalQuestions) * 100);
+
+    if (s.answerRevealed) {
+      setScreen('s-question');
+      document.getElementById('q-rtitle').textContent = s.roundName;
+      document.getElementById('q-badge').textContent = badge;
+      document.getElementById('q-prog').style.width = prog + '%';
+      document.getElementById('q-num').textContent = `Klausimas ${s.question+1} / ${s.totalQuestions}`;
+      document.getElementById('q-text').textContent = s.questionText;
+      document.getElementById('q-pills').innerHTML = pillsHtml;
+      renderOpts(s, myAns, true);
+      if (s.fact) {
+        document.getElementById('q-fact').style.display = 'block';
+        document.getElementById('q-fact-text').textContent = s.fact;
+      }
+    } else if (myAns) {
+      setScreen('s-sent');
+      document.getElementById('sent-title').textContent = s.roundName;
+      document.getElementById('sent-badge').textContent = badge;
+    } else {
+      setScreen('s-question');
+      document.getElementById('q-rtitle').textContent = s.roundName;
+      document.getElementById('q-badge').textContent = badge;
+      document.getElementById('q-prog').style.width = prog + '%';
+      document.getElementById('q-num').textContent = `Klausimas ${s.question+1} / ${s.totalQuestions}`;
+      document.getElementById('q-text').textContent = s.questionText;
+      document.getElementById('q-pills').innerHTML = pillsHtml;
+      document.getElementById('q-fact').style.display = 'none';
+      renderOpts(s, null, false);
+    }
+    return;
+  }
+
+  if (s.phase === 'final') {
+    setScreen('s-final');
+    const sorted = Object.entries(s.scores || {}).sort((a, b) => b[1] - a[1]);
+    const medals = ['🥇','🥈','🥉'];
+    const winner = players.find(p => p.id === sorted[0]?.[0]);
+    const myScore = s.scores?.[myId] || 0;
+    document.getElementById('final-winner').innerHTML = `
+      <div style="font-size:52px;margin-bottom:.75rem">🏆</div>
+      <div style="font-size:13px;color:var(--mu);margin-bottom:.4rem;letter-spacing:.06em">LAIMĖTOJAS</div>
+      <div style="font-size:28px;font-weight:800;color:var(--go);margin-bottom:.25rem">${winner?.name || '?'}</div>
+      <div style="font-size:14px;color:var(--mu);margin-bottom:1rem">${sorted[0]?.[1] || 0} taškai</div>
+      <div style="font-size:14px;color:var(--mu)">Tavo rezultatas: <strong style="color:var(--pl)">${myScore} taškai</strong></div>`;
+    document.getElementById('final-lb').innerHTML = sorted.map(([id, pts], i) => {
+      const p = players.find(x => x.id === id);
+      return `<div class="lb-row${i===0?' top':''}${id===myId?' me':''}">
+        <span style="font-size:18px;width:28px">${medals[i]||'#'+(i+1)}</span>
+        <span style="flex:1;font-size:14px;font-weight:500">${p?.name||'?'}${id===myId?' (tu)':''}</span>
+        <span class="lb-pts">${pts}</span></div>`;
+    }).join('');
+  }
+}
+
+function renderOpts(s, myAns, revealed) {
+  const count = s.options.length;
+  const gridClass = count === 2 ? 'opts-2' : count === 3 ? 'opts-3' : 'opts-4';
+  const html = `<div class="${gridClass}">` + s.options.map((opt, i) => {
+    let cls = 'opt';
+    if (revealed) {
+      if (i === s.correctIndex) cls += ' correct';
+      else if (myAns && myAns.optionIndex === i) cls += ' wrong';
+    } else if (myAns?.optionIndex === i) cls += ' selected';
+    const disabled = (revealed || myAns) ? 'disabled' : '';
+    return `<button class="${cls}" ${disabled} onclick="answer(${i})">
+      <span class="ltr">${LETTERS[i]}</span>
+      <span>${opt}</span>
+    </button>`;
+  }).join('') + '</div>';
+  document.getElementById('q-opts').innerHTML = html;
+}
+
+function answer(idx) {
+  if (myLastOpt !== null) return;
+  myLastOpt = idx;
+  socket.emit('player:answer', { optionIndex: idx });
+  document.querySelectorAll('.opt').forEach((b, i) => {
+    b.disabled = true;
+    if (i === idx) b.classList.add('selected');
+  });
+  setTimeout(() => setScreen('s-sent'), 350);
+}
+
+function setScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

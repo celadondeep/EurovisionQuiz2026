@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eurovizija Quiz – Vedėjas</title>
+<style>
+:root{--bg:#0d0b1a;--s:#16132a;--s2:#1e1a35;--bd:rgba(255,255,255,0.08);--pu:#7c5cfc;--pl:#a68dff;--go:#f5c842;--gr:#3ecf8e;--re:#ff5c5c;--tx:#f0eeff;--mu:rgba(240,238,255,0.45)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:var(--s);border-right:.5px solid var(--bd);padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.main{padding:1.25rem;overflow-y:auto}
+.logo-row{display:flex;align-items:center;gap:8px;margin-bottom:.25rem}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--pu);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0}
+.app-title{font-size:15px;font-weight:700;flex:1}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(124,92,252,.15);color:var(--pl);border:.5px solid rgba(124,92,252,.3)}
+.sec{font-size:10px;letter-spacing:.08em;color:var(--mu);font-weight:500;text-transform:uppercase;margin-bottom:5px}
+.btn{padding:9px 16px;border-radius:9px;border:none;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;transition:opacity .15s}
+.btn:active{opacity:.75}
+.btn:disabled{opacity:.3;cursor:default}
+.btn-pu{background:var(--pu);color:#fff}
+.btn-gr{background:rgba(62,207,142,.12);color:var(--gr);border:.5px solid rgba(62,207,142,.3)}
+.btn-gray{background:var(--s2);color:var(--mu);border:.5px solid var(--bd)}
+.btn-re{background:rgba(255,92,92,.1);color:var(--re);border:.5px solid rgba(255,92,92,.25)}
+
+/* sidebar */
+.p-row{display:flex;align-items:center;gap:5px;padding:7px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
+.p-row:last-child{border:none}
+.p-name{flex:1;font-size:13px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-pts{font-size:17px;font-weight:700;color:var(--pl);min-width:24px;text-align:right}
+.adj-btns{display:flex;gap:3px;flex-shrink:0}
+.adj{padding:3px 6px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+.adj-p{background:rgba(62,207,142,.15);color:var(--gr)}
+.adj-m{background:rgba(255,92,92,.1);color:var(--re)}
+
+/* question area */
+.q-card{background:var(--s);border:.5px solid var(--bd);border-radius:14px;padding:1.125rem;margin-bottom:1rem}
+.q-meta{font-size:11px;color:var(--mu);margin-bottom:.5rem}
+.q-text{font-size:19px;font-weight:700;color:var(--tx);line-height:1.4;margin-bottom:1rem}
+.prog{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-bottom:1rem;overflow:hidden}
+.prog-fill{height:100%;background:var(--pu);border-radius:2px;transition:width .4s}
+
+/* options */
+.opts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.875rem}
+.opts-grid-3{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.875rem}
+.opts-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.875rem}
+
+.opt-row{border-radius:10px;padding:11px 14px;border:.5px solid var(--bd);background:var(--s2);display:flex;align-items:center;gap:10px;transition:all .2s}
+.opt-row.correct{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.45)}
+.opt-letter{width:26px;height:26px;border-radius:8px;background:rgba(124,92,252,.15);color:var(--pl);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opt-row.correct .opt-letter{background:var(--gr);color:#fff}
+.opt-text{font-size:13px;flex:1;font-weight:500;line-height:1.3}
+.opt-bar-wrap{width:48px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.opt-count{font-size:18px;font-weight:700;color:var(--pl);line-height:1}
+.opt-row.correct .opt-count{color:var(--gr)}
+.opt-pct{font-size:10px;color:var(--mu)}
+
+/* mini bar */
+.mini-bar{width:100%;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:6px}
+.mini-fill{height:100%;background:var(--pu);border-radius:2px;transition:width .4s}
+.opt-row.correct .mini-fill{background:var(--gr)}
+
+/* fact */
+.fact-box{background:rgba(124,92,252,.08);border:.5px solid rgba(124,92,252,.2);border-radius:10px;padding:10px 12px;margin-bottom:.875rem}
+.fact-l{font-size:10px;color:var(--pl);letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase}
+.fact-t{font-size:13px;color:var(--tx);line-height:1.5}
+
+/* answers section */
+.ans-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
+.ans-chip{padding:5px 10px;border-radius:8px;font-size:12px;background:var(--s2);border:.5px solid var(--bd);color:var(--tx)}
+.ans-chip.correct{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.3);color:var(--gr)}
+
+/* round pills */
+.r-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.875rem}
+.r-pill{padding:5px 12px;border-radius:20px;font-size:12px;border:.5px solid var(--bd);background:var(--s);color:var(--mu);cursor:pointer}
+.r-pill.active{background:rgba(124,92,252,.18);border-color:var(--pu);color:var(--pl);font-weight:500}
+.r-pill.done{background:rgba(62,207,142,.08);border-color:rgba(62,207,142,.25);color:var(--gr)}
+
+/* lobby */
+.lobby-center{text-align:center;padding:3rem 1rem;max-width:440px;margin:0 auto}
+.url-box{font-size:15px;color:var(--pl);padding:10px 16px;background:rgba(124,92,252,.1);border-radius:10px;margin-bottom:1.25rem;word-break:break-all;user-select:all;cursor:text}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.25rem}
+.stat{background:var(--s);border-radius:10px;padding:10px;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:var(--pl)}
+.stat-l{font-size:11px;color:var(--mu);margin-top:2px}
+
+/* lb */
+.lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--s);margin-bottom:6px}
+.lb-row.top{background:rgba(245,200,66,.07);border:.5px solid rgba(245,200,66,.2)}
+.lb-pts{font-size:20px;font-weight:700;color:var(--pl)}
+.lb-row.top .lb-pts{color:var(--go)}
+
+/* phase visibility */
+.ph{display:none}
+.ph.active{display:block}
+
+@media(max-width:720px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:.5px solid var(--bd)}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-row">
+      <div class="logo">E</div>
+      <div class="app-title">Vedėjo pultas</div>
+      <span class="badge" id="ph-badge">Lobby</span>
+    </div>
+    <div>
+      <div class="sec">Žaidėjai</div>
+      <div id="players-list"><div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div></div>
+    </div>
+    <div style="margin-top:auto">
+      <button class="btn btn-re" style="width:100%" onclick="if(confirm('Tikrai pradėti iš naujo?'))socket.emit('host:reset')">↺ Naujas žaidimas</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LOBBY -->
+    <div class="ph active" id="ph-lobby">
+      <div class="lobby-center">
+        <div style="font-size:52px;margin-bottom:1.25rem">🎤</div>
+        <div style="font-size:22px;font-weight:700;margin-bottom:.5rem">Eurovizija Quiz</div>
+        <div style="font-size:14px;color:var(--mu);margin-bottom:1.5rem">Dalinkis nuoroda su žaidėjais, tada pradėk!</div>
+        <div class="url-box" id="player-url"></div>
+        <div class="stat-grid">
+          <div class="stat"><div class="stat-n" id="stat-p">0</div><div class="stat-l">žaidėjai</div></div>
+          <div class="stat"><div class="stat-n">3</div><div class="stat-l">etapai</div></div>
+          <div class="stat"><div class="stat-n">17</div><div class="stat-l">klausimai</div></div>
+        </div>
+        <button class="btn btn-pu" style="padding:13px 32px;font-size:15px" id="start-btn" onclick="socket.emit('host:start')" disabled>Pradėti žaidimą →</button>
+      </div>
+    </div>
+
+    <!-- QUESTION -->
+    <div class="ph" id="ph-question">
+      <div class="r-pills" id="r-pills"></div>
+      <div class="q-card">
+        <div class="prog"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="q-meta" id="q-meta"></div>
+        <div class="q-text" id="q-text"></div>
+        <div id="opts-area"></div>
+        <div class="fact-box" id="fact-box" style="display:none">
+          <div class="fact-l">Įdomu žinoti</div>
+          <div class="fact-t" id="fact-text"></div>
+        </div>
+        <div style="margin-bottom:.75rem">
+          <div class="sec">Atsakė (<span id="ans-count">0</span> / <span id="ans-total">0</span>)</div>
+          <div class="ans-grid" id="ans-grid"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-gray" onclick="socket.emit('host:prev')">← Atgal</button>
+          <button class="btn btn-gr" id="reveal-btn" onclick="socket.emit('host:reveal')">👁 Atskleisti</button>
+          <button class="btn btn-pu" id="next-btn" onclick="socket.emit('host:next')">Kitas →</button>
+          <button class="btn btn-gray" onclick="showLb()">📊 Lentelė</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="ph" id="ph-lb">
+      <div style="font-size:18px;font-weight:700;margin-bottom:1rem">📊 Rikiuotė</div>
+      <div id="lb-content"></div>
+      <div style="display:flex;gap:8px;margin-top:1rem">
+        <button class="btn btn-gray" onclick="showQ()">← Grįžti</button>
+        <button class="btn btn-pu" onclick="socket.emit('host:next')">Kitas klausimas →</button>
+      </div>
+    </div>
+
+    <!-- FINAL -->
+    <div class="ph" id="ph-final">
+      <div style="text-align:center;padding:2.5rem 1rem;max-width:400px;margin:0 auto">
+        <div style="font-size:56px;margin-bottom:1rem">🏆</div>
+        <div style="font-size:24px;font-weight:700;margin-bottom:.25rem">Žaidimas baigtas!</div>
+        <div style="font-size:14px;color:var(--mu);margin-bottom:1.5rem">Galutinė rikiuotė</div>
+        <div id="final-lb"></div>
+        <button class="btn btn-pu" style="margin-top:1.25rem;padding:12px 28px" onclick="if(confirm('Pradėti iš naujo?'))socket.emit('host:reset')">↺ Naujas žaidimas</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const LETTERS = ['A','B','C','D'];
+let state = {};
+document.getElementById('player-url').textContent = window.location.origin + '/';
+const socket = io({ query: { role: 'host' } });
+socket.on('state', s => { state = s; render(); });
+
+function render() {
+  const { phase, players, scores, round, question, totalQuestions, totalRounds,
+          roundName, questionText, options, correctIndex, fact, answerRevealed, answers } = state;
+  const playerList = Object.values(players || {});
+  const sorted = [...playerList].sort((a,b) => (scores[b.id]||0) - (scores[a.id]||0));
+  const medals = ['🥇','🥈','🥉'];
+  const ansArr = Object.values(answers || {});
+
+  document.getElementById('ph-badge').textContent =
+    phase==='lobby' ? 'Lobby' : phase==='final' ? 'Finalas' : roundName;
+  document.getElementById('stat-p').textContent = playerList.length;
+  document.getElementById('start-btn').disabled = playerList.length < 1;
+
+  // Sidebar players
+  const pl = document.getElementById('players-list');
+  pl.innerHTML = sorted.length
+    ? sorted.map((p,i) => `
+      <div class="p-row">
+        <span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'·'}</span>
+        <span class="p-name">${p.name}</span>
+        <div class="adj-btns">
+          <button class="adj adj-m" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:-1})">-1</button>
+          <button class="adj adj-p" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:1})">+1</button>
+        </div>
+        <span class="p-pts">${scores[p.id]||0}</span>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div>';
+
+  // Show correct phase
+  ['lobby','question','lb','final'].forEach(p => document.getElementById('ph-'+p).classList.remove('active'));
+
+  if (phase === 'lobby') {
+    document.getElementById('ph-lobby').classList.add('active');
+    return;
+  }
+
+  if (phase === 'question') {
+    document.getElementById('ph-question').classList.add('active');
+
+    // Round pills
+    const roundNames = ['Istorija','Lietuva','ABBA ir faktai'];
+    document.getElementById('r-pills').innerHTML = Array.from({length: totalRounds||3}, (_,i) =>
+      `<button class="r-pill${i===round?' active':i<round?' done':''}" onclick="socket.emit('host:jump',{round:${i}})">${i+1}. ${roundNames[i]||'Etapas '+(i+1)}</button>`
+    ).join('');
+
+    // Progress
+    document.getElementById('prog-fill').style.width = Math.round((question/(totalQuestions||1))*100) + '%';
+    document.getElementById('q-meta').textContent = `${roundName} · Klausimas ${question+1} / ${totalQuestions}`;
+    document.getElementById('q-text').textContent = questionText;
+
+    // Options with counts and mini bars
+    const total = ansArr.length || 1;
+    const count = (options||[]).length;
+    const gridClass = count===2 ? 'opts-grid-2' : count===3 ? 'opts-grid-3' : 'opts-grid-4';
+    document.getElementById('opts-area').innerHTML = `<div class="${gridClass}">` +
+      (options||[]).map((opt,i) => {
+        const n = ansArr.filter(a => a.optionIndex === i).length;
+        const pct = ansArr.length > 0 ? Math.round((n/ansArr.length)*100) : 0;
+        const isCorrect = answerRevealed && i === correctIndex;
+        return `<div class="opt-row${isCorrect?' correct':''}">
+          <div class="opt-letter">${LETTERS[i]}</div>
+          <div style="flex:1;min-width:0">
+            <div class="opt-text">${opt}</div>
+            ${ansArr.length>0 ? `<div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>` : ''}
+          </div>
+          ${ansArr.length>0 ? `<div class="opt-bar-wrap"><div class="opt-count">${n}</div>${answerRevealed?`<div class="opt-pct">${pct}%</div>`:''}</div>` : ''}
+        </div>`;
+      }).join('') + '</div>';
+
+    // Fact
+    if (answerRevealed && fact) {
+      document.getElementById('fact-box').style.display = 'block';
+      document.getElementById('fact-text').textContent = fact;
+    } else {
+      document.getElementById('fact-box').style.display = 'none';
+    }
+
+    // Who answered
+    document.getElementById('ans-count').textContent = ansArr.length;
+    document.getElementById('ans-total').textContent = playerList.length;
+    document.getElementById('ans-grid').innerHTML = ansArr.map(a => {
+      const correct = answerRevealed && a.optionIndex === correctIndex;
+      return `<span class="ans-chip${correct?' correct':''}">${a.name} → ${LETTERS[a.optionIndex]}</span>`;
+    }).join('');
+
+    document.getElementById('reveal-btn').disabled = answerRevealed;
+    const isLastQ = question >= totalQuestions-1;
+    const isLastR = round >= (totalRounds||3)-1;
+    document.getElementById('next-btn').textContent =
+      isLastQ && isLastR ? 'Finalas 🏆' : isLastQ ? 'Kitas etapas →' : 'Kitas →';
+    return;
+  }
+
+  if (phase === 'final') {
+    document.getElementById('ph-final').classList.add('active');
+    document.getElementById('final-lb').innerHTML = sorted.map((p,i) => `
+      <div class="lb-row${i===0?' top':''}">
+        <span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span>
+        <span style="flex:1;font-size:14px;font-weight:500">${p.name}</span>
+        <span class="lb-pts">${scores[p.id]||0}</span>
+      </div>`).join('');
+  }
+}
+
+function showLb() {
+  ['lobby','question','lb','final'].forEach(p => document.getElementById('ph-'+p).classList.remove('active'));
+  document.getElementById('ph-lb').classList.add('active');
+  const { players, scores } = state;
+  const sorted = [...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('lb-content').innerHTML = sorted.map((p,i) => `
+    <div class="lb-row${i===0?' top':''}">
+      <span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span>
+      <span style="flex:1;font-size:14px;font-weight:500">${p.name}</span>
+      <span class="lb-pts">${scores[p.id]||0}</span>
+    </div>`).join('');
+}
+
+function showQ() {
+  ['lobby','question','lb','final'].forEach(p => document.getElementById('ph-'+p).classList.remove('active'));
+  document.getElementById('ph-question').classList.add('active');
+}
+</script>
+</body>
+</html>
