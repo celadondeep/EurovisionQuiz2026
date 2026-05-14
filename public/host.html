@@ -23,8 +23,6 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .btn-gr{background:rgba(62,207,142,.12);color:var(--gr);border:.5px solid rgba(62,207,142,.3)}
 .btn-gray{background:var(--s2);color:var(--mu);border:.5px solid var(--bd)}
 .btn-re{background:rgba(255,92,92,.1);color:var(--re);border:.5px solid rgba(255,92,92,.25)}
-
-/* sidebar */
 .p-row{display:flex;align-items:center;gap:5px;padding:7px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
 .p-row:last-child{border:none}
 .p-name{flex:1;font-size:13px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -33,19 +31,14 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .adj{padding:3px 6px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
 .adj-p{background:rgba(62,207,142,.15);color:var(--gr)}
 .adj-m{background:rgba(255,92,92,.1);color:var(--re)}
-
-/* question area */
 .q-card{background:var(--s);border:.5px solid var(--bd);border-radius:14px;padding:1.125rem;margin-bottom:1rem}
 .q-meta{font-size:11px;color:var(--mu);margin-bottom:.5rem}
 .q-text{font-size:19px;font-weight:700;color:var(--tx);line-height:1.4;margin-bottom:1rem}
 .prog{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-bottom:1rem;overflow:hidden}
 .prog-fill{height:100%;background:var(--pu);border-radius:2px;transition:width .4s}
-
-/* options */
 .opts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.875rem}
 .opts-grid-3{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.875rem}
 .opts-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.875rem}
-
 .opt-row{border-radius:10px;padding:11px 14px;border:.5px solid var(--bd);background:var(--s2);display:flex;align-items:center;gap:10px;transition:all .2s}
 .opt-row.correct{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.45)}
 .opt-letter{width:26px;height:26px;border-radius:8px;background:rgba(124,92,252,.15);color:var(--pl);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -55,45 +48,115 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .opt-count{font-size:18px;font-weight:700;color:var(--pl);line-height:1}
 .opt-row.correct .opt-count{color:var(--gr)}
 .opt-pct{font-size:10px;color:var(--mu)}
-
-/* mini bar */
 .mini-bar{width:100%;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:6px}
 .mini-fill{height:100%;background:var(--pu);border-radius:2px;transition:width .4s}
 .opt-row.correct .mini-fill{background:var(--gr)}
-
-/* fact */
 .fact-box{background:rgba(124,92,252,.08);border:.5px solid rgba(124,92,252,.2);border-radius:10px;padding:10px 12px;margin-bottom:.875rem}
 .fact-l{font-size:10px;color:var(--pl);letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase}
 .fact-t{font-size:13px;color:var(--tx);line-height:1.5}
-
-/* answers section */
 .ans-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
 .ans-chip{padding:5px 10px;border-radius:8px;font-size:12px;background:var(--s2);border:.5px solid var(--bd);color:var(--tx)}
 .ans-chip.correct{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.3);color:var(--gr)}
-
-/* round pills */
 .r-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.875rem}
 .r-pill{padding:5px 12px;border-radius:20px;font-size:12px;border:.5px solid var(--bd);background:var(--s);color:var(--mu);cursor:pointer}
 .r-pill.active{background:rgba(124,92,252,.18);border-color:var(--pu);color:var(--pl);font-weight:500}
 .r-pill.done{background:rgba(62,207,142,.08);border-color:rgba(62,207,142,.25);color:var(--gr)}
-
-/* lobby */
-.lobby-center{text-align:center;padding:3rem 1rem;max-width:440px;margin:0 auto}
-.url-box{font-size:15px;color:var(--pl);padding:10px 16px;background:rgba(124,92,252,.1);border-radius:10px;margin-bottom:1.25rem;word-break:break-all;user-select:all;cursor:text}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.25rem}
-.stat{background:var(--s);border-radius:10px;padding:10px;text-align:center}
-.stat-n{font-size:22px;font-weight:700;color:var(--pl)}
-.stat-l{font-size:11px;color:var(--mu);margin-top:2px}
-
-/* lb */
 .lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--s);margin-bottom:6px}
 .lb-row.top{background:rgba(245,200,66,.07);border:.5px solid rgba(245,200,66,.2)}
 .lb-pts{font-size:20px;font-weight:700;color:var(--pl)}
 .lb-row.top .lb-pts{color:var(--go)}
-
-/* phase visibility */
 .ph{display:none}
 .ph.active{display:block}
+
+/* ── LOBBY ── */
+#ph-lobby.active{
+  display:flex;
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:#07061a;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  overflow:hidden;
+}
+.lobby-title{
+  font-size:clamp(1.6rem,3.5vw,2.8rem);
+  font-weight:200;
+  color:#fff;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  text-align:center;
+  margin-bottom:.3rem;
+  opacity:.85;
+  position:relative;
+  z-index:2;
+}
+.lobby-title strong{font-weight:800;letter-spacing:.05em;}
+.lobby-year{
+  font-size:.75rem;
+  letter-spacing:.4em;
+  color:rgba(255,255,255,.25);
+  text-transform:uppercase;
+  text-align:center;
+  margin-bottom:3rem;
+  position:relative;
+  z-index:2;
+}
+.lobby-countdown{
+  font-size:clamp(2rem,4vw,3.5rem);
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-.02em;
+  line-height:1;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  transition:color .4s;
+  margin-bottom:.4rem;
+  position:relative;
+  z-index:2;
+  opacity:.9;
+}
+.lobby-countdown.urgent{color:#ff6b6b;}
+.lobby-countdown-label{
+  font-size:.65rem;
+  letter-spacing:.3em;
+  color:rgba(255,255,255,.2);
+  text-transform:uppercase;
+  text-align:center;
+  position:relative;
+  z-index:2;
+}
+.lobby-player-count{
+  position:fixed;
+  bottom:2rem;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:.7rem;
+  letter-spacing:.2em;
+  color:rgba(255,255,255,.18);
+  text-transform:uppercase;
+  white-space:nowrap;
+  z-index:2;
+}
+.lobby-player-count span{color:rgba(255,255,255,.4);font-weight:600;}
+
+/* ── ORBITING NAMES ── */
+#names-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+}
+.floating-name{
+  position:absolute;
+  color:rgba(255,255,255,.15);
+  font-size:clamp(.75rem,1.3vw,1rem);
+  font-weight:300;
+  letter-spacing:.1em;
+  white-space:nowrap;
+  transform:translate(-50%,-50%);
+}
 
 @media(max-width:720px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:.5px solid var(--bd)}}
 </style>
@@ -101,8 +164,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 <body>
 <div class="layout">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
+  <div class="sidebar" id="main-sidebar">
     <div class="logo-row">
       <div class="logo">E</div>
       <div class="app-title">Vedėjo pultas</div>
@@ -117,23 +179,21 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
+  <div class="main" id="main-content">
 
     <!-- LOBBY -->
     <div class="ph active" id="ph-lobby">
-      <div class="lobby-center">
-        <div style="font-size:52px;margin-bottom:1.25rem">🎤</div>
-        <div style="font-size:22px;font-weight:700;margin-bottom:.5rem">Eurovizija Quiz</div>
-        <div style="font-size:14px;color:var(--mu);margin-bottom:1.5rem">Dalinkis nuoroda su žaidėjais, tada pradėk!</div>
-        <div class="url-box" id="player-url"></div>
-        <div class="stat-grid">
-          <div class="stat"><div class="stat-n" id="stat-p">0</div><div class="stat-l">žaidėjai</div></div>
-          <div class="stat"><div class="stat-n">3</div><div class="stat-l">etapai</div></div>
-          <div class="stat"><div class="stat-n">17</div><div class="stat-l">klausimai</div></div>
-        </div>
-        <button class="btn btn-pu" style="padding:13px 32px;font-size:15px" id="start-btn" onclick="socket.emit('host:start')" disabled>Pradėti žaidimą →</button>
+      <div id="names-layer"></div>
+      <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+        <div class="lobby-title">Eurovizijos <strong>PopQuiznas</strong></div>
+        <div class="lobby-year">Viena · 2026</div>
+        <div class="lobby-countdown" id="countdown">10:00</div>
+        <div class="lobby-countdown-label">iki pradžios</div>
       </div>
+      <div class="lobby-player-count">prisijungę: <span id="stat-p">0</span></div>
+      <iframe id="yt-player" width="0" height="0"
+        style="position:absolute;opacity:0;pointer-events:none"
+        src="about:blank" allow="autoplay" frameborder="0"></iframe>
     </div>
 
     <!-- QUESTION -->
@@ -187,29 +247,113 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const LETTERS = ['A','B','C','D'];
-let state = {};
-document.getElementById('player-url').textContent = window.location.origin + '/';
-const socket = io({ query: { role: 'host' } });
-socket.on('state', s => { state = s; render(); });
+const LETTERS=['A','B','C','D'];
+let state={};
+const socket=io({query:{role:'host'}});
+socket.on('state',s=>{state=s;render();});
 
-function render() {
-  const { phase, players, scores, round, question, totalQuestions, totalRounds,
-          roundName, questionText, options, correctIndex, fact, answerRevealed, answers } = state;
-  const playerList = Object.values(players || {});
-  const sorted = [...playerList].sort((a,b) => (scores[b.id]||0) - (scores[a.id]||0));
-  const medals = ['🥇','🥈','🥉'];
-  const ansArr = Object.values(answers || {});
+// MUSIC
+const YT_SRC="https://www.youtube.com/embed/4eDwa8-lQZI?autoplay=1&start=10&loop=1&playlist=4eDwa8-lQZI&controls=0";
+function stopMusic(){document.getElementById('yt-player').src='about:blank';}
 
-  document.getElementById('ph-badge').textContent =
-    phase==='lobby' ? 'Lobby' : phase==='final' ? 'Finalas' : roundName;
-  document.getElementById('stat-p').textContent = playerList.length;
-  document.getElementById('start-btn').disabled = playerList.length < 1;
+// COUNTDOWN
+let countdownSeconds=10*60,countdownInterval;
+function startCountdown(){
+  countdownInterval=setInterval(()=>{
+    countdownSeconds--;
+    if(countdownSeconds<=0){
+      clearInterval(countdownInterval);
+      document.getElementById('countdown').textContent='00:00';
+      stopMusic();
+      socket.emit('host:start');
+      return;
+    }
+    const m=Math.floor(countdownSeconds/60),s=countdownSeconds%60;
+    document.getElementById('countdown').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('countdown').classList.toggle('urgent',countdownSeconds<=60);
+  },1000);
+}
 
-  // Sidebar players
-  const pl = document.getElementById('players-list');
-  pl.innerHTML = sorted.length
-    ? sorted.map((p,i) => `
+// ORBITING NAMES
+let knownPlayers=new Set();
+let activeOrbits=[];
+
+function spawnName(name){
+  const layer=document.getElementById('names-layer');
+  const el=document.createElement('div');
+  el.className='floating-name';
+  el.textContent=name;
+  layer.appendChild(el);
+
+  const cx=50, cy=50;
+  const rx=(28+Math.random()*20)*1.8; // ellipse x radius
+  const ry=18+Math.random()*14;       // ellipse y radius
+  const startAngle=Math.random()*360;
+  const speed=(0.25+Math.random()*0.3)*(Math.random()>0.5?1:-1);
+  const duration=(10+Math.random()*8)*1000;
+  const startTime=performance.now();
+
+  function tick(now){
+    const elapsed=now-startTime;
+    if(elapsed>=duration){el.remove();return;}
+    const progress=elapsed/duration;
+    const alpha=progress<0.1?progress/0.1:progress>0.85?1-(progress-0.85)/0.15:1;
+    const angle=(startAngle+elapsed*speed*0.06)*(Math.PI/180);
+    const x=cx+rx*Math.cos(angle);
+    const y=cy+ry*Math.sin(angle);
+    el.style.left=x+'%';
+    el.style.top=y+'%';
+    el.style.opacity=alpha*0.35;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+let knownPlayersList=new Set();
+function checkNewPlayers(players){
+  Object.values(players||{}).forEach(p=>{
+    if(!knownPlayersList.has(p.id)){
+      knownPlayersList.add(p.id);
+      spawnName(p.name);
+      // respawn periodically while in lobby
+      const interval=setInterval(()=>{
+        if(state.phase==='lobby') spawnName(p.name);
+        else clearInterval(interval);
+      },12000+Math.random()*8000);
+    }
+  });
+}
+
+window.addEventListener('load',()=>{
+  startCountdown();
+  setTimeout(()=>{document.getElementById('yt-player').src=YT_SRC;},1000);
+});
+
+// LAYOUT
+function setLobbyLayout(isLobby){
+  document.getElementById('main-sidebar').style.display=isLobby?'none':'';
+  const mc=document.getElementById('main-content');
+  mc.style.gridColumn=isLobby?'1 / -1':'';
+  mc.style.padding=isLobby?'0':'';
+}
+
+// RENDER
+function render(){
+  const{phase,players,scores,round,question,totalQuestions,totalRounds,
+        roundName,questionText,options,correctIndex,fact,answerRevealed,answers}=state;
+  const playerList=Object.values(players||{});
+  const sorted=[...playerList].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));
+  const medals=['🥇','🥈','🥉'];
+  const ansArr=Object.values(answers||{});
+
+  document.getElementById('ph-badge').textContent=phase==='lobby'?'Lobby':phase==='final'?'Finalas':roundName;
+  document.getElementById('stat-p').textContent=playerList.length;
+
+  if(phase==='lobby') checkNewPlayers(players);
+
+  const pl=document.getElementById('players-list');
+  pl.innerHTML=sorted.length
+    ?sorted.map((p,i)=>`
       <div class="p-row">
         <span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'·'}</span>
         <span class="p-name">${p.name}</span>
@@ -219,76 +363,55 @@ function render() {
         </div>
         <span class="p-pts">${scores[p.id]||0}</span>
       </div>`).join('')
-    : '<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div>';
+    :'<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div>';
 
-  // Show correct phase
-  ['lobby','question','lb','final'].forEach(p => document.getElementById('ph-'+p).classList.remove('active'));
+  ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
+  setLobbyLayout(phase==='lobby');
 
-  if (phase === 'lobby') {
-    document.getElementById('ph-lobby').classList.add('active');
-    return;
-  }
+  if(phase==='lobby'){document.getElementById('ph-lobby').classList.add('active');return;}
 
-  if (phase === 'question') {
+  if(phase==='question'){
     document.getElementById('ph-question').classList.add('active');
-
-    // Round pills
-    const roundNames = ['Istorija','Lietuva','ABBA ir faktai'];
-    document.getElementById('r-pills').innerHTML = Array.from({length: totalRounds||3}, (_,i) =>
+    const roundNames=['Istorija','Lietuva','ABBA ir faktai'];
+    document.getElementById('r-pills').innerHTML=Array.from({length:totalRounds||3},(_,i)=>
       `<button class="r-pill${i===round?' active':i<round?' done':''}" onclick="socket.emit('host:jump',{round:${i}})">${i+1}. ${roundNames[i]||'Etapas '+(i+1)}</button>`
     ).join('');
-
-    // Progress
-    document.getElementById('prog-fill').style.width = Math.round((question/(totalQuestions||1))*100) + '%';
-    document.getElementById('q-meta').textContent = `${roundName} · Klausimas ${question+1} / ${totalQuestions}`;
-    document.getElementById('q-text').textContent = questionText;
-
-    // Options with counts and mini bars
-    const total = ansArr.length || 1;
-    const count = (options||[]).length;
-    const gridClass = count===2 ? 'opts-grid-2' : count===3 ? 'opts-grid-3' : 'opts-grid-4';
-    document.getElementById('opts-area').innerHTML = `<div class="${gridClass}">` +
-      (options||[]).map((opt,i) => {
-        const n = ansArr.filter(a => a.optionIndex === i).length;
-        const pct = ansArr.length > 0 ? Math.round((n/ansArr.length)*100) : 0;
-        const isCorrect = answerRevealed && i === correctIndex;
-        return `<div class="opt-row${isCorrect?' correct':''}">
+    document.getElementById('prog-fill').style.width=Math.round((question/(totalQuestions||1))*100)+'%';
+    document.getElementById('q-meta').textContent=`${roundName} · Klausimas ${question+1} / ${totalQuestions}`;
+    document.getElementById('q-text').textContent=questionText;
+    const count=(options||[]).length;
+    const gridClass=count===2?'opts-grid-2':count===3?'opts-grid-3':'opts-grid-4';
+    document.getElementById('opts-area').innerHTML=`<div class="${gridClass}">`+
+      (options||[]).map((opt,i)=>{
+        const n=ansArr.filter(a=>a.optionIndex===i).length;
+        const pct=ansArr.length>0?Math.round((n/ansArr.length)*100):0;
+        const isCorrect=answerRevealed&&i===correctIndex;
+        return`<div class="opt-row${isCorrect?' correct':''}">
           <div class="opt-letter">${LETTERS[i]}</div>
           <div style="flex:1;min-width:0">
             <div class="opt-text">${opt}</div>
-            ${ansArr.length>0 ? `<div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>` : ''}
+            ${ansArr.length>0?`<div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`:''}
           </div>
-          ${ansArr.length>0 ? `<div class="opt-bar-wrap"><div class="opt-count">${n}</div>${answerRevealed?`<div class="opt-pct">${pct}%</div>`:''}</div>` : ''}
+          ${ansArr.length>0?`<div class="opt-bar-wrap"><div class="opt-count">${n}</div>${answerRevealed?`<div class="opt-pct">${pct}%</div>`:''}</div>`:''}
         </div>`;
-      }).join('') + '</div>';
-
-    // Fact
-    if (answerRevealed && fact) {
-      document.getElementById('fact-box').style.display = 'block';
-      document.getElementById('fact-text').textContent = fact;
-    } else {
-      document.getElementById('fact-box').style.display = 'none';
-    }
-
-    // Who answered
-    document.getElementById('ans-count').textContent = ansArr.length;
-    document.getElementById('ans-total').textContent = playerList.length;
-    document.getElementById('ans-grid').innerHTML = ansArr.map(a => {
-      const correct = answerRevealed && a.optionIndex === correctIndex;
-      return `<span class="ans-chip${correct?' correct':''}">${a.name} → ${LETTERS[a.optionIndex]}</span>`;
+      }).join('')+'</div>';
+    if(answerRevealed&&fact){document.getElementById('fact-box').style.display='block';document.getElementById('fact-text').textContent=fact;}
+    else document.getElementById('fact-box').style.display='none';
+    document.getElementById('ans-count').textContent=ansArr.length;
+    document.getElementById('ans-total').textContent=playerList.length;
+    document.getElementById('ans-grid').innerHTML=ansArr.map(a=>{
+      const correct=answerRevealed&&a.optionIndex===correctIndex;
+      return`<span class="ans-chip${correct?' correct':''}">${a.name} → ${LETTERS[a.optionIndex]}</span>`;
     }).join('');
-
-    document.getElementById('reveal-btn').disabled = answerRevealed;
-    const isLastQ = question >= totalQuestions-1;
-    const isLastR = round >= (totalRounds||3)-1;
-    document.getElementById('next-btn').textContent =
-      isLastQ && isLastR ? 'Finalas 🏆' : isLastQ ? 'Kitas etapas →' : 'Kitas →';
+    document.getElementById('reveal-btn').disabled=answerRevealed;
+    const isLastQ=question>=totalQuestions-1,isLastR=round>=(totalRounds||3)-1;
+    document.getElementById('next-btn').textContent=isLastQ&&isLastR?'Finalas 🏆':isLastQ?'Kitas etapas →':'Kitas →';
     return;
   }
 
-  if (phase === 'final') {
+  if(phase==='final'){
     document.getElementById('ph-final').classList.add('active');
-    document.getElementById('final-lb').innerHTML = sorted.map((p,i) => `
+    document.getElementById('final-lb').innerHTML=sorted.map((p,i)=>`
       <div class="lb-row${i===0?' top':''}">
         <span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span>
         <span style="flex:1;font-size:14px;font-weight:500">${p.name}</span>
@@ -297,22 +420,21 @@ function render() {
   }
 }
 
-function showLb() {
-  ['lobby','question','lb','final'].forEach(p => document.getElementById('ph-'+p).classList.remove('active'));
+function showLb(){
+  ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
   document.getElementById('ph-lb').classList.add('active');
-  const { players, scores } = state;
-  const sorted = [...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));
-  const medals = ['🥇','🥈','🥉'];
-  document.getElementById('lb-content').innerHTML = sorted.map((p,i) => `
+  const{players,scores}=state;
+  const sorted=[...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('lb-content').innerHTML=sorted.map((p,i)=>`
     <div class="lb-row${i===0?' top':''}">
       <span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span>
       <span style="flex:1;font-size:14px;font-weight:500">${p.name}</span>
       <span class="lb-pts">${scores[p.id]||0}</span>
     </div>`).join('');
 }
-
-function showQ() {
-  ['lobby','question','lb','final'].forEach(p => document.getElementById('ph-'+p).classList.remove('active'));
+function showQ(){
+  ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
   document.getElementById('ph-question').classList.add('active');
 }
 </script>
