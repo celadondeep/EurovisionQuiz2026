@@ -68,17 +68,27 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .ph{display:none}
 .ph.active{display:block}
 
-/* ── LOBBY ── */
+/* LOBBY */
 #ph-lobby.active{
   display:flex;
   position:fixed;
   inset:0;
   z-index:100;
-  background:#07061a;
   align-items:center;
   justify-content:center;
   flex-direction:column;
   overflow:hidden;
+  background-color:#07061a;
+  background-image:url('/bg.jpg');
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+}
+.lobby-overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.62);
+  z-index:0;
 }
 .lobby-title{
   font-size:clamp(1.6rem,3.5vw,2.8rem);
@@ -88,7 +98,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
   text-transform:uppercase;
   text-align:center;
   margin-bottom:.3rem;
-  opacity:.85;
+  opacity:.9;
   position:relative;
   z-index:2;
 }
@@ -96,7 +106,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .lobby-year{
   font-size:.75rem;
   letter-spacing:.4em;
-  color:rgba(255,255,255,.25);
+  color:rgba(255,255,255,.3);
   text-transform:uppercase;
   text-align:center;
   margin-bottom:3rem;
@@ -121,7 +131,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .lobby-countdown-label{
   font-size:.65rem;
   letter-spacing:.3em;
-  color:rgba(255,255,255,.2);
+  color:rgba(255,255,255,.25);
   text-transform:uppercase;
   text-align:center;
   position:relative;
@@ -134,14 +144,14 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
   transform:translateX(-50%);
   font-size:.7rem;
   letter-spacing:.2em;
-  color:rgba(255,255,255,.18);
+  color:rgba(255,255,255,.2);
   text-transform:uppercase;
   white-space:nowrap;
   z-index:2;
 }
-.lobby-player-count span{color:rgba(255,255,255,.4);font-weight:600;}
+.lobby-player-count span{color:rgba(255,255,255,.45);font-weight:600;}
 
-/* ── ORBITING NAMES ── */
+/* ORBITING NAMES */
 #names-layer{
   position:absolute;
   inset:0;
@@ -150,14 +160,13 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 }
 .floating-name{
   position:absolute;
-  color:rgba(255,255,255,.15);
+  color:rgba(255,255,255,.2);
   font-size:clamp(.75rem,1.3vw,1rem);
   font-weight:300;
   letter-spacing:.1em;
   white-space:nowrap;
   transform:translate(-50%,-50%);
 }
-
 @media(max-width:720px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:.5px solid var(--bd)}}
 </style>
 </head>
@@ -175,7 +184,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
       <div id="players-list"><div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div></div>
     </div>
     <div style="margin-top:auto">
-      <button class="btn btn-re" style="width:100%" onclick="if(confirm('Tikrai pradėti iš naujo?'))socket.emit('host:reset')">↺ Naujas žaidimas</button>
+      <button class="btn btn-re" style="width:100%" onclick="if(confirm('Tikrai pradėti iš naujo?'))socket.emit('host:reset')">Naujas žaidimas</button>
     </div>
   </div>
 
@@ -183,6 +192,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 
     <!-- LOBBY -->
     <div class="ph active" id="ph-lobby">
+      <div class="lobby-overlay"></div>
       <div id="names-layer"></div>
       <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
         <div class="lobby-title">Eurovizijos <strong>PopQuiznas</strong></div>
@@ -205,29 +215,29 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <div class="q-text" id="q-text"></div>
         <div id="opts-area"></div>
         <div class="fact-box" id="fact-box" style="display:none">
-          <div class="fact-l">Įdomu žinoti</div>
+          <div class="fact-l">Idomu zinoti</div>
           <div class="fact-t" id="fact-text"></div>
         </div>
         <div style="margin-bottom:.75rem">
-          <div class="sec">Atsakė (<span id="ans-count">0</span> / <span id="ans-total">0</span>)</div>
+          <div class="sec">Atsake (<span id="ans-count">0</span> / <span id="ans-total">0</span>)</div>
           <div class="ans-grid" id="ans-grid"></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <button class="btn btn-gray" onclick="socket.emit('host:prev')">← Atgal</button>
-          <button class="btn btn-gr" id="reveal-btn" onclick="socket.emit('host:reveal')">👁 Atskleisti</button>
-          <button class="btn btn-pu" id="next-btn" onclick="socket.emit('host:next')">Kitas →</button>
-          <button class="btn btn-gray" onclick="showLb()">📊 Lentelė</button>
+          <button class="btn btn-gray" onclick="socket.emit('host:prev')">Atgal</button>
+          <button class="btn btn-gr" id="reveal-btn" onclick="socket.emit('host:reveal')">Atskleisti</button>
+          <button class="btn btn-pu" id="next-btn" onclick="socket.emit('host:next')">Kitas</button>
+          <button class="btn btn-gray" onclick="showLb()">Lentele</button>
         </div>
       </div>
     </div>
 
     <!-- LEADERBOARD -->
     <div class="ph" id="ph-lb">
-      <div style="font-size:18px;font-weight:700;margin-bottom:1rem">📊 Rikiuotė</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:1rem">Rikiuote</div>
       <div id="lb-content"></div>
       <div style="display:flex;gap:8px;margin-top:1rem">
-        <button class="btn btn-gray" onclick="showQ()">← Grįžti</button>
-        <button class="btn btn-pu" onclick="socket.emit('host:next')">Kitas klausimas →</button>
+        <button class="btn btn-gray" onclick="showQ()">Grizti</button>
+        <button class="btn btn-pu" onclick="socket.emit('host:next')">Kitas klausimas</button>
       </div>
     </div>
 
@@ -235,10 +245,10 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
     <div class="ph" id="ph-final">
       <div style="text-align:center;padding:2.5rem 1rem;max-width:400px;margin:0 auto">
         <div style="font-size:56px;margin-bottom:1rem">🏆</div>
-        <div style="font-size:24px;font-weight:700;margin-bottom:.25rem">Žaidimas baigtas!</div>
-        <div style="font-size:14px;color:var(--mu);margin-bottom:1.5rem">Galutinė rikiuotė</div>
+        <div style="font-size:24px;font-weight:700;margin-bottom:.25rem">Zaidimas baigtas!</div>
+        <div style="font-size:14px;color:var(--mu);margin-bottom:1.5rem">Galutine rikiuote</div>
         <div id="final-lb"></div>
-        <button class="btn btn-pu" style="margin-top:1.25rem;padding:12px 28px" onclick="if(confirm('Pradėti iš naujo?'))socket.emit('host:reset')">↺ Naujas žaidimas</button>
+        <button class="btn btn-pu" style="margin-top:1.25rem;padding:12px 28px" onclick="if(confirm('Pradetiis naujo?'))socket.emit('host:reset')">Naujas zaidimas</button>
       </div>
     </div>
 
@@ -252,11 +262,9 @@ let state={};
 const socket=io({query:{role:'host'}});
 socket.on('state',s=>{state=s;render();});
 
-// MUSIC
 const YT_SRC="https://www.youtube.com/embed/4eDwa8-lQZI?autoplay=1&start=10&loop=1&playlist=4eDwa8-lQZI&controls=0";
 function stopMusic(){document.getElementById('yt-player').src='about:blank';}
 
-// COUNTDOWN
 let countdownSeconds=10*60,countdownInterval;
 function startCountdown(){
   countdownInterval=setInterval(()=>{
@@ -274,25 +282,20 @@ function startCountdown(){
   },1000);
 }
 
-// ORBITING NAMES
-let knownPlayers=new Set();
-let activeOrbits=[];
-
+let knownPlayersList=new Set();
 function spawnName(name){
   const layer=document.getElementById('names-layer');
   const el=document.createElement('div');
   el.className='floating-name';
   el.textContent=name;
   layer.appendChild(el);
-
-  const cx=50, cy=50;
-  const rx=(28+Math.random()*20)*1.8; // ellipse x radius
-  const ry=18+Math.random()*14;       // ellipse y radius
+  const cx=50,cy=50;
+  const rx=(28+Math.random()*20)*1.8;
+  const ry=18+Math.random()*14;
   const startAngle=Math.random()*360;
   const speed=(0.25+Math.random()*0.3)*(Math.random()>0.5?1:-1);
   const duration=(10+Math.random()*8)*1000;
   const startTime=performance.now();
-
   function tick(now){
     const elapsed=now-startTime;
     if(elapsed>=duration){el.remove();return;}
@@ -303,19 +306,17 @@ function spawnName(name){
     const y=cy+ry*Math.sin(angle);
     el.style.left=x+'%';
     el.style.top=y+'%';
-    el.style.opacity=alpha*0.35;
+    el.style.opacity=alpha*0.4;
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 }
 
-let knownPlayersList=new Set();
 function checkNewPlayers(players){
   Object.values(players||{}).forEach(p=>{
     if(!knownPlayersList.has(p.id)){
       knownPlayersList.add(p.id);
       spawnName(p.name);
-      // respawn periodically while in lobby
       const interval=setInterval(()=>{
         if(state.phase==='lobby') spawnName(p.name);
         else clearInterval(interval);
@@ -329,7 +330,6 @@ window.addEventListener('load',()=>{
   setTimeout(()=>{document.getElementById('yt-player').src=YT_SRC;},1000);
 });
 
-// LAYOUT
 function setLobbyLayout(isLobby){
   document.getElementById('main-sidebar').style.display=isLobby?'none':'';
   const mc=document.getElementById('main-content');
@@ -337,7 +337,6 @@ function setLobbyLayout(isLobby){
   mc.style.padding=isLobby?'0':'';
 }
 
-// RENDER
 function render(){
   const{phase,players,scores,round,question,totalQuestions,totalRounds,
         roundName,questionText,options,correctIndex,fact,answerRevealed,answers}=state;
@@ -348,14 +347,13 @@ function render(){
 
   document.getElementById('ph-badge').textContent=phase==='lobby'?'Lobby':phase==='final'?'Finalas':roundName;
   document.getElementById('stat-p').textContent=playerList.length;
-
   if(phase==='lobby') checkNewPlayers(players);
 
   const pl=document.getElementById('players-list');
   pl.innerHTML=sorted.length
     ?sorted.map((p,i)=>`
       <div class="p-row">
-        <span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'·'}</span>
+        <span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'.'}</span>
         <span class="p-name">${p.name}</span>
         <div class="adj-btns">
           <button class="adj adj-m" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:-1})">-1</button>
@@ -363,7 +361,7 @@ function render(){
         </div>
         <span class="p-pts">${scores[p.id]||0}</span>
       </div>`).join('')
-    :'<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div>';
+    :'<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama zaideju...</div>';
 
   ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
   setLobbyLayout(phase==='lobby');
@@ -401,11 +399,11 @@ function render(){
     document.getElementById('ans-total').textContent=playerList.length;
     document.getElementById('ans-grid').innerHTML=ansArr.map(a=>{
       const correct=answerRevealed&&a.optionIndex===correctIndex;
-      return`<span class="ans-chip${correct?' correct':''}">${a.name} → ${LETTERS[a.optionIndex]}</span>`;
+      return`<span class="ans-chip${correct?' correct':''}">${a.name} -> ${LETTERS[a.optionIndex]}</span>`;
     }).join('');
     document.getElementById('reveal-btn').disabled=answerRevealed;
     const isLastQ=question>=totalQuestions-1,isLastR=round>=(totalRounds||3)-1;
-    document.getElementById('next-btn').textContent=isLastQ&&isLastR?'Finalas 🏆':isLastQ?'Kitas etapas →':'Kitas →';
+    document.getElementById('next-btn').textContent=isLastQ&&isLastR?'Finalas':isLastQ?'Kitas etapas':'Kitas';
     return;
   }
 
