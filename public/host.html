@@ -67,146 +67,52 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .lb-row.top .lb-pts{color:var(--go)}
 .ph{display:none}
 .ph.active{display:block}
-
-/* LOBBY */
-#ph-lobby.active{
-  display:flex;
-  position:fixed;
-  inset:0;
-  z-index:100;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  overflow:hidden;
-  background-color:#07061a;
-  background-image:url('/bg.jpg');
-  background-size:cover;
-  background-position:center center;
-  background-repeat:no-repeat;
-}
-.lobby-overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.62);
-  z-index:0;
-}
-.lobby-title{
-  font-size:clamp(1.6rem,3.5vw,2.8rem);
-  font-weight:200;
-  color:#fff;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  text-align:center;
-  margin-bottom:.3rem;
-  opacity:.9;
-  position:relative;
-  z-index:2;
-}
+.lobby-bg{position:absolute;inset:0;background-image:url("/bg.jpg");background-size:cover;background-position:center center;background-repeat:no-repeat;animation:slowzoom 20s ease-in-out infinite alternate;z-index:0;}
+@keyframes slowzoom{from{transform:scale(1);}to{transform:scale(1.08);}}
+#ph-lobby.active{display:flex;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;background-color:#07061a;}
+.lobby-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.62);z-index:0;}
+.lobby-title{font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:200;color:#fff;letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-bottom:.3rem;opacity:.9;position:relative;z-index:2;}
 .lobby-title strong{font-weight:800;letter-spacing:.05em;}
-.lobby-year{
-  font-size:.75rem;
-  letter-spacing:.4em;
-  color:rgba(255,255,255,.3);
-  text-transform:uppercase;
-  text-align:center;
-  margin-bottom:3rem;
-  position:relative;
-  z-index:2;
-}
-.lobby-countdown{
-  font-size:clamp(2rem,4vw,3.5rem);
-  font-weight:800;
-  color:#fff;
-  letter-spacing:-.02em;
-  line-height:1;
-  text-align:center;
-  font-variant-numeric:tabular-nums;
-  transition:color .4s;
-  margin-bottom:.4rem;
-  position:relative;
-  z-index:2;
-  opacity:.9;
-}
+.lobby-year{font-size:.75rem;letter-spacing:.4em;color:rgba(255,255,255,.3);text-transform:uppercase;text-align:center;margin-bottom:3rem;position:relative;z-index:2;}
+.lobby-countdown{font-size:clamp(2rem,4vw,3.5rem);font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;text-align:center;font-variant-numeric:tabular-nums;transition:color .4s;margin-bottom:.4rem;position:relative;z-index:2;opacity:.9;}
 .lobby-countdown.urgent{color:#ff6b6b;}
-.lobby-countdown-label{
-  font-size:.65rem;
-  letter-spacing:.3em;
-  color:rgba(255,255,255,.25);
-  text-transform:uppercase;
-  text-align:center;
-  position:relative;
-  z-index:2;
-}
-.lobby-player-count{
-  position:fixed;
-  bottom:2rem;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:.7rem;
-  letter-spacing:.2em;
-  color:rgba(255,255,255,.2);
-  text-transform:uppercase;
-  white-space:nowrap;
-  z-index:2;
-}
+.lobby-countdown-label{font-size:.65rem;letter-spacing:.3em;color:rgba(255,255,255,.25);text-transform:uppercase;text-align:center;position:relative;z-index:2;}
+.lobby-player-count{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);font-size:.7rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase;white-space:nowrap;z-index:2;}
 .lobby-player-count span{color:rgba(255,255,255,.45);font-weight:600;}
-
-/* ORBITING NAMES */
-#names-layer{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:1;
-}
-.floating-name{
-  position:absolute;
-  color:rgba(255,255,255,.2);
-  font-size:clamp(.75rem,1.3vw,1rem);
-  font-weight:300;
-  letter-spacing:.1em;
-  white-space:nowrap;
-  transform:translate(-50%,-50%);
-}
+.music-hint{position:fixed;top:1.5rem;right:1.5rem;font-size:.65rem;letter-spacing:.15em;color:rgba(255,255,255,.25);text-transform:uppercase;z-index:3;cursor:pointer;transition:color .2s;}
+.music-hint:hover{color:rgba(255,255,255,.6);}
 @media(max-width:720px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:.5px solid var(--bd)}}
 </style>
 </head>
 <body>
 <div class="layout">
-
   <div class="sidebar" id="main-sidebar">
     <div class="logo-row">
       <div class="logo">E</div>
-      <div class="app-title">Vedėjo pultas</div>
+      <div class="app-title">Vedejo pultas</div>
       <span class="badge" id="ph-badge">Lobby</span>
     </div>
     <div>
-      <div class="sec">Žaidėjai</div>
-      <div id="players-list"><div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama žaidėjų...</div></div>
+      <div class="sec">Zaidejai</div>
+      <div id="players-list"><div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama zaideju...</div></div>
     </div>
     <div style="margin-top:auto">
-      <button class="btn btn-re" style="width:100%" onclick="if(confirm('Tikrai pradėti iš naujo?'))socket.emit('host:reset')">Naujas žaidimas</button>
+      <button class="btn btn-re" style="width:100%" onclick="if(confirm('Is naujo?'))socket.emit('host:reset')">Naujas zaidimas</button>
     </div>
   </div>
-
   <div class="main" id="main-content">
-
-    <!-- LOBBY -->
     <div class="ph active" id="ph-lobby">
-      <div class="lobby-overlay"></div>
-      <div id="names-layer"></div>
+      <div class="lobby-bg"></div><div class="lobby-overlay"></div>
+      <div class="music-hint" id="music-hint" onclick="startMusic()">♪ spusk muzikai</div>
       <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
         <div class="lobby-title">Eurovizijos <strong>PopQuiznas</strong></div>
         <div class="lobby-year">Viena · 2026</div>
         <div class="lobby-countdown" id="countdown">10:00</div>
-        <div class="lobby-countdown-label">iki pradžios</div>
+        <div class="lobby-countdown-label">iki pradzios</div>
       </div>
-      <div class="lobby-player-count">prisijungę: <span id="stat-p">0</span></div>
-      <iframe id="yt-player" width="0" height="0"
-        style="position:absolute;opacity:0;pointer-events:none"
-        src="about:blank" allow="autoplay" frameborder="0"></iframe>
+      <div class="lobby-player-count">prisijunge: <span id="stat-p">0</span></div>
+      <iframe id="yt-player" width="0" height="0" style="position:absolute;opacity:0;pointer-events:none" src="about:blank" allow="autoplay" frameborder="0"></iframe>
     </div>
-
-    <!-- QUESTION -->
     <div class="ph" id="ph-question">
       <div class="r-pills" id="r-pills"></div>
       <div class="q-card">
@@ -230,8 +136,6 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         </div>
       </div>
     </div>
-
-    <!-- LEADERBOARD -->
     <div class="ph" id="ph-lb">
       <div style="font-size:18px;font-weight:700;margin-bottom:1rem">Rikiuote</div>
       <div id="lb-content"></div>
@@ -240,201 +144,90 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <button class="btn btn-pu" onclick="socket.emit('host:next')">Kitas klausimas</button>
       </div>
     </div>
-
-    <!-- FINAL -->
     <div class="ph" id="ph-final">
       <div style="text-align:center;padding:2.5rem 1rem;max-width:400px;margin:0 auto">
         <div style="font-size:56px;margin-bottom:1rem">🏆</div>
         <div style="font-size:24px;font-weight:700;margin-bottom:.25rem">Zaidimas baigtas!</div>
         <div style="font-size:14px;color:var(--mu);margin-bottom:1.5rem">Galutine rikiuote</div>
         <div id="final-lb"></div>
-        <button class="btn btn-pu" style="margin-top:1.25rem;padding:12px 28px" onclick="if(confirm('Pradetiis naujo?'))socket.emit('host:reset')">Naujas zaidimas</button>
+        <button class="btn btn-pu" style="margin-top:1.25rem;padding:12px 28px" onclick="if(confirm('Is naujo?'))socket.emit('host:reset')">Naujas zaidimas</button>
       </div>
     </div>
-
   </div>
 </div>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const LETTERS=['A','B','C','D'];
 let state={};
 const socket=io({query:{role:'host'}});
 socket.on('state',s=>{state=s;render();});
-
 const YT_SRC="https://www.youtube.com/embed/4eDwa8-lQZI?autoplay=1&start=10&loop=1&playlist=4eDwa8-lQZI&controls=0";
-function stopMusic(){document.getElementById('yt-player').src='about:blank';}
-
+let musicStarted=false;
+function startMusic(){
+  if(musicStarted)return;
+  musicStarted=true;
+  document.getElementById('yt-player').src=YT_SRC;
+  const h=document.getElementById('music-hint');
+  if(h)h.textContent='♪ groja';
+}
+document.addEventListener('click',function once(){startMusic();document.removeEventListener('click',once);},{once:true});
+function stopMusic(){document.getElementById('yt-player').src='about:blank';musicStarted=false;}
 let countdownSeconds=10*60,countdownInterval;
 function startCountdown(){
   countdownInterval=setInterval(()=>{
     countdownSeconds--;
-    if(countdownSeconds<=0){
-      clearInterval(countdownInterval);
-      document.getElementById('countdown').textContent='00:00';
-      stopMusic();
-      socket.emit('host:start');
-      return;
-    }
+    if(countdownSeconds<=0){clearInterval(countdownInterval);document.getElementById('countdown').textContent='00:00';stopMusic();socket.emit('host:start');return;}
     const m=Math.floor(countdownSeconds/60),s=countdownSeconds%60;
     document.getElementById('countdown').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     document.getElementById('countdown').classList.toggle('urgent',countdownSeconds<=60);
   },1000);
 }
-
-let knownPlayersList=new Set();
-function spawnName(name){
-  const layer=document.getElementById('names-layer');
-  const el=document.createElement('div');
-  el.className='floating-name';
-  el.textContent=name;
-  layer.appendChild(el);
-  const cx=50,cy=50;
-  const rx=(28+Math.random()*20)*1.8;
-  const ry=18+Math.random()*14;
-  const startAngle=Math.random()*360;
-  const speed=(0.25+Math.random()*0.3)*(Math.random()>0.5?1:-1);
-  const duration=(10+Math.random()*8)*1000;
-  const startTime=performance.now();
-  function tick(now){
-    const elapsed=now-startTime;
-    if(elapsed>=duration){el.remove();return;}
-    const progress=elapsed/duration;
-    const alpha=progress<0.1?progress/0.1:progress>0.85?1-(progress-0.85)/0.15:1;
-    const angle=(startAngle+elapsed*speed*0.06)*(Math.PI/180);
-    const x=cx+rx*Math.cos(angle);
-    const y=cy+ry*Math.sin(angle);
-    el.style.left=x+'%';
-    el.style.top=y+'%';
-    el.style.opacity=alpha*0.4;
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-function checkNewPlayers(players){
-  Object.values(players||{}).forEach(p=>{
-    if(!knownPlayersList.has(p.id)){
-      knownPlayersList.add(p.id);
-      spawnName(p.name);
-      const interval=setInterval(()=>{
-        if(state.phase==='lobby') spawnName(p.name);
-        else clearInterval(interval);
-      },12000+Math.random()*8000);
-    }
-  });
-}
-
-window.addEventListener('load',()=>{
-  startCountdown();
-  setTimeout(()=>{document.getElementById('yt-player').src=YT_SRC;},1000);
-});
-
+window.addEventListener('load',()=>startCountdown());
 function setLobbyLayout(isLobby){
   document.getElementById('main-sidebar').style.display=isLobby?'none':'';
   const mc=document.getElementById('main-content');
   mc.style.gridColumn=isLobby?'1 / -1':'';
   mc.style.padding=isLobby?'0':'';
 }
-
 function render(){
-  const{phase,players,scores,round,question,totalQuestions,totalRounds,
-        roundName,questionText,options,correctIndex,fact,answerRevealed,answers}=state;
+  const{phase,players,scores,round,question,totalQuestions,totalRounds,roundName,questionText,options,correctIndex,fact,answerRevealed,answers}=state;
   const playerList=Object.values(players||{});
   const sorted=[...playerList].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));
   const medals=['🥇','🥈','🥉'];
   const ansArr=Object.values(answers||{});
-
   document.getElementById('ph-badge').textContent=phase==='lobby'?'Lobby':phase==='final'?'Finalas':roundName;
   document.getElementById('stat-p').textContent=playerList.length;
-  if(phase==='lobby') checkNewPlayers(players);
-
   const pl=document.getElementById('players-list');
-  pl.innerHTML=sorted.length
-    ?sorted.map((p,i)=>`
-      <div class="p-row">
-        <span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'.'}</span>
-        <span class="p-name">${p.name}</span>
-        <div class="adj-btns">
-          <button class="adj adj-m" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:-1})">-1</button>
-          <button class="adj adj-p" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:1})">+1</button>
-        </div>
-        <span class="p-pts">${scores[p.id]||0}</span>
-      </div>`).join('')
-    :'<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama zaideju...</div>';
-
+  pl.innerHTML=sorted.length?sorted.map((p,i)=>`<div class="p-row"><span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'.'}</span><span class="p-name">${p.name}</span><div class="adj-btns"><button class="adj adj-m" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:-1})">-1</button><button class="adj adj-p" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:1})">+1</button></div><span class="p-pts">${scores[p.id]||0}</span></div>`).join(''):'<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama zaideju...</div>';
   ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
   setLobbyLayout(phase==='lobby');
-
   if(phase==='lobby'){document.getElementById('ph-lobby').classList.add('active');return;}
-
   if(phase==='question'){
     document.getElementById('ph-question').classList.add('active');
     const roundNames=['Istorija','Lietuva','ABBA ir faktai'];
-    document.getElementById('r-pills').innerHTML=Array.from({length:totalRounds||3},(_,i)=>
-      `<button class="r-pill${i===round?' active':i<round?' done':''}" onclick="socket.emit('host:jump',{round:${i}})">${i+1}. ${roundNames[i]||'Etapas '+(i+1)}</button>`
-    ).join('');
+    document.getElementById('r-pills').innerHTML=Array.from({length:totalRounds||3},(_,i)=>`<button class="r-pill${i===round?' active':i<round?' done':''}" onclick="socket.emit('host:jump',{round:${i}})">${i+1}. ${roundNames[i]||'Etapas '+(i+1)}</button>`).join('');
     document.getElementById('prog-fill').style.width=Math.round((question/(totalQuestions||1))*100)+'%';
     document.getElementById('q-meta').textContent=`${roundName} · Klausimas ${question+1} / ${totalQuestions}`;
     document.getElementById('q-text').textContent=questionText;
     const count=(options||[]).length;
     const gridClass=count===2?'opts-grid-2':count===3?'opts-grid-3':'opts-grid-4';
-    document.getElementById('opts-area').innerHTML=`<div class="${gridClass}">`+
-      (options||[]).map((opt,i)=>{
-        const n=ansArr.filter(a=>a.optionIndex===i).length;
-        const pct=ansArr.length>0?Math.round((n/ansArr.length)*100):0;
-        const isCorrect=answerRevealed&&i===correctIndex;
-        return`<div class="opt-row${isCorrect?' correct':''}">
-          <div class="opt-letter">${LETTERS[i]}</div>
-          <div style="flex:1;min-width:0">
-            <div class="opt-text">${opt}</div>
-            ${ansArr.length>0?`<div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`:''}
-          </div>
-          ${ansArr.length>0?`<div class="opt-bar-wrap"><div class="opt-count">${n}</div>${answerRevealed?`<div class="opt-pct">${pct}%</div>`:''}</div>`:''}
-        </div>`;
-      }).join('')+'</div>';
-    if(answerRevealed&&fact){document.getElementById('fact-box').style.display='block';document.getElementById('fact-text').textContent=fact;}
-    else document.getElementById('fact-box').style.display='none';
+    document.getElementById('opts-area').innerHTML=`<div class="${gridClass}">`+(options||[]).map((opt,i)=>{const n=ansArr.filter(a=>a.optionIndex===i).length;const pct=ansArr.length>0?Math.round((n/ansArr.length)*100):0;const isCorrect=answerRevealed&&i===correctIndex;return`<div class="opt-row${isCorrect?' correct':''}"><div class="opt-letter">${LETTERS[i]}</div><div style="flex:1;min-width:0"><div class="opt-text">${opt}</div>${ansArr.length>0?`<div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`:''}</div>${ansArr.length>0?`<div class="opt-bar-wrap"><div class="opt-count">${n}</div>${answerRevealed?`<div class="opt-pct">${pct}%</div>`:''}</div>`:''}</div>`;}).join('')+'</div>';
+    if(answerRevealed&&fact){document.getElementById('fact-box').style.display='block';document.getElementById('fact-text').textContent=fact;}else document.getElementById('fact-box').style.display='none';
     document.getElementById('ans-count').textContent=ansArr.length;
     document.getElementById('ans-total').textContent=playerList.length;
-    document.getElementById('ans-grid').innerHTML=ansArr.map(a=>{
-      const correct=answerRevealed&&a.optionIndex===correctIndex;
-      return`<span class="ans-chip${correct?' correct':''}">${a.name} -> ${LETTERS[a.optionIndex]}</span>`;
-    }).join('');
+    document.getElementById('ans-grid').innerHTML=ansArr.map(a=>{const correct=answerRevealed&&a.optionIndex===correctIndex;return`<span class="ans-chip${correct?' correct':''}">${a.name} -> ${LETTERS[a.optionIndex]}</span>`;}).join('');
     document.getElementById('reveal-btn').disabled=answerRevealed;
     const isLastQ=question>=totalQuestions-1,isLastR=round>=(totalRounds||3)-1;
     document.getElementById('next-btn').textContent=isLastQ&&isLastR?'Finalas':isLastQ?'Kitas etapas':'Kitas';
     return;
   }
-
   if(phase==='final'){
     document.getElementById('ph-final').classList.add('active');
-    document.getElementById('final-lb').innerHTML=sorted.map((p,i)=>`
-      <div class="lb-row${i===0?' top':''}">
-        <span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span>
-        <span style="flex:1;font-size:14px;font-weight:500">${p.name}</span>
-        <span class="lb-pts">${scores[p.id]||0}</span>
-      </div>`).join('');
+    document.getElementById('final-lb').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-size:14px;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');
   }
 }
-
-function showLb(){
-  ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
-  document.getElementById('ph-lb').classList.add('active');
-  const{players,scores}=state;
-  const sorted=[...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));
-  const medals=['🥇','🥈','🥉'];
-  document.getElementById('lb-content').innerHTML=sorted.map((p,i)=>`
-    <div class="lb-row${i===0?' top':''}">
-      <span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span>
-      <span style="flex:1;font-size:14px;font-weight:500">${p.name}</span>
-      <span class="lb-pts">${scores[p.id]||0}</span>
-    </div>`).join('');
-}
-function showQ(){
-  ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
-  document.getElementById('ph-question').classList.add('active');
-}
+function showLb(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-lb').classList.add('active');const{players,scores}=state;const sorted=[...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));const medals=['🥇','🥈','🥉'];document.getElementById('lb-content').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-size:14px;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');}
+function showQ(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-question').classList.add('active');}
 </script>
 </body>
 </html>
