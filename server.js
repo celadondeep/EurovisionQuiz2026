@@ -243,6 +243,31 @@ io.on('connection', (socket) => {
   });
 });
 
+// Webhook auto-update
+const { exec } = require('child_process');
+const crypto = require('crypto');
+
+const WEBHOOK_SECRET = 'eurovizija2026'; // pakeisk į savo slaptazodi
+
+app.post('/webhook', (req, res) => {
+  const sig = req.headers['x-hub-signature-256'];
+  const body = JSON.stringify(req.body);
+  const hmac = 'sha256=' + crypto.createHmac('sha256', WEBHOOK_SECRET).update(body).digest('hex');
+  
+  if (sig !== hmac) {
+    return res.status(403).send('Forbidden');
+  }
+  
+  res.status(200).send('OK');
+  
+  exec('cd /var/www/eurovizija && git pull origin main && systemctl restart eurovizija', (err, stdout, stderr) => {
+    if (err) console.error('Webhook klaida:', err);
+    else console.log('Auto-update sekmingai:', stdout);
+  });
+});
+
+app.use(express.json());
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`\n🎤 Eurovizija Quiz serveris veikia!`);
