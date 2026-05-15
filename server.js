@@ -47,7 +47,7 @@ const ROUNDS = [
       { q: "Kuri šalis laimėjo pirmąją Euroviziją 1956 m.?", opts: ["Prancūzija", "Italija", "Šveicarija", "Vokietija"], correct: 2, fact: "Šveicarija laimėjo su Lys Assia ir daina 'Refrain' pirmajame konkurse Lugane." },
       { q: "Kokia aukščiausia vieta, kurią Lietuva užėmė Eurovizijoje?", opts: ["3 vieta", "6 vieta", "8 vieta"], correct: 1, fact: "LT United 2006 m. su 'We Are The Winners' – 6 vieta. The Roop 2021 m. užėmė 8 vietą." },
       { q: "Kuri dingusi valstybė laimėjo Euroviziją 1989 m.?", opts: ["Čekoslovakija", "Rytų Vokietija", "Jugoslavija", "Sovietų Sąjunga"], correct: 2, fact: "Jugoslavija laimėjo su Riva ir 'Rock Me'. Vos po dvejų metų šalis žlugo." },
-      { q: "Kiek kartų Airija laimėjo Euroviziją?", opts: ["5 kartus", "7 kartus", "9 kartus"], correct: 1, fact: "Airija laimėjo 7 kartus – tiek pat kiek Švedija! 1992–1994 m. laimėjo tris kartus iš eilės." },
+      { q: "Kiek kartų Airija laimėjo Euroviziją?", opts: ["5 kartus", "7 kartus", "3 kartus"], correct: 1, fact: "Airija laimėjo 7 kartus – tiek pat kiek Švedija! 1992–1994 m. laimėjo tris kartus iš eilės." },
     ]
   },
   {
