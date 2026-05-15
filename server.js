@@ -112,7 +112,7 @@ function resetGame() {
     lobbyTimeLeft: settings.lobbySeconds, lobbyTimer: null,
     cheaters: {},
   };
-  startLobbyTimer();
+  // Timer will start when host reconnects
 }
 
 function currentQ() {
@@ -226,6 +226,10 @@ io.on('connection', (socket) => {
     socket.join('host');
     socket.emit('state', getPublicState());
     socket.emit('settings', settings);
+    // Start lobby timer when host connects (if not already running)
+    if (!gameState.lobbyTimer && gameState.phase === 'lobby') {
+      startLobbyTimer();
+    }
   }
 
   socket.on('join', ({ name }) => {
@@ -310,8 +314,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start lobby timer on boot
-startLobbyTimer();
+// Lobby timer starts only when host connects;
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
