@@ -125,10 +125,8 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <div class="lobby-countdown" id="countdown">9:30</div>
         <div class="lobby-countdown-lbl">iki pradžios</div>
         <div class="lobby-players">Prisijungę: <span id="lobby-count">0</span></div>
-        <div style="display:flex;gap:.5rem;margin-top:1.5rem;">
-          <button onclick="socket.emit('host:lobby_pause')" style="padding:.5rem 1rem;border-radius:50px;border:.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:.8rem;cursor:pointer;">⏸ Pauzė</button>
-          <button onclick="socket.emit('host:lobby_resume')" style="padding:.5rem 1rem;border-radius:50px;border:.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:.8rem;cursor:pointer;">▶ Tęsti</button>
-          <button onclick="socket.emit('host:start')" style="padding:.5rem 1rem;border-radius:50px;border:none;background:#fff;color:#07061a;font-size:.8rem;font-weight:700;cursor:pointer;">Pradėti →</button>
+        <div id="start-btn-wrap" style="margin-top:1.5rem;display:none;">
+          <button onclick="socket.emit('host:start');stopMusic();" style="padding:.75rem 2rem;border-radius:50px;border:none;background:#fff;color:#07061a;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.04em;">Pradėti žaidimą →</button>
         </div>
       </div>
       <iframe id="yt-player" width="1" height="1" style="position:absolute;opacity:0.01;pointer-events:none;bottom:0;left:0" src="about:blank" allow="autoplay" frameborder="0"></iframe>
@@ -279,6 +277,8 @@ function render(){
   setLobbyLayout(phase==='lobby');
 
   if(phase==='lobby'){document.getElementById('ph-lobby').classList.add('active');return;}
+  // Muzika isjungiama kai prasideda zaidimas
+  if(phase!=='lobby' && musicStarted){stopMusic();}
 
   if(phase==='question'){
     document.getElementById('ph-question').classList.add('active');
