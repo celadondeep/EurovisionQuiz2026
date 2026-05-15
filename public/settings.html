@@ -59,7 +59,7 @@ input:checked + .toggle-slider:before{transform:translateX(20px);}
   </div>
 
   <!-- LOBIIO LAIKAS -->
-  <div class="card">
+  <div class="card" data-type="lobby">
     <div class="card-title">Lobiio laikas</div>
     <div class="field">
       <div class="label">Laikas iki žaidimo pradžios <span id="lobby-val">9:30</span></div>
@@ -74,7 +74,7 @@ input:checked + .toggle-slider:before{transform:translateX(20px);}
   </div>
 
   <!-- KLAUSIMO LAIKAS -->
-  <div class="card">
+  <div class="card" data-type="q">
     <div class="card-title">Klausimo laikas</div>
     <div class="field">
       <div class="label">Laikas atsakyti klausimui <span id="q-val">15 sek</span></div>
@@ -88,8 +88,23 @@ input:checked + .toggle-slider:before{transform:translateX(20px);}
     </div>
   </div>
 
+  <!-- ATSAKYMO RODYMAS -->
+  <div class="card" data-type="reveal">
+    <div class="card-title">Teisingo atsakymo rodymo laikas</div>
+    <div class="field">
+      <div class="label">Kiek laiko rodyti teisingą atsakymą <span id="reveal-val">2.5 sek</span></div>
+      <div class="presets">
+        <div class="preset" onclick="setReveal(1500)">1.5 sek</div>
+        <div class="preset active" onclick="setReveal(2500)">2.5 sek</div>
+        <div class="preset" onclick="setReveal(4000)">4 sek</div>
+        <div class="preset" onclick="setReveal(6000)">6 sek</div>
+      </div>
+      <input class="slider" type="range" id="reveal-slider" min="1000" max="10000" step="500" value="2500" oninput="onRevealSlider(this.value)">
+    </div>
+  </div>
+
   <!-- AUTO NUSTATYMAI -->
-  <div class="card">
+  <div class="card" data-type="auto">
     <div class="card-title">Automatika</div>
     <div class="toggle-row">
       <div>
@@ -134,6 +149,9 @@ fetch('/api/settings').then(r => r.json()).then(s => {
   document.getElementById('lobby-slider').value = lobbySeconds;
   document.getElementById('q-slider').value = qSeconds;
   document.getElementById('auto-reveal').checked = s.autoReveal;
+  document.getElementById('reveal-slider').value = s.revealDuration||2500;
+  updateRevealVal(s.revealDuration||2500);
+  updatePresets('reveal', s.revealDuration||2500);
   document.getElementById('auto-next').checked = s.autoNext;
   document.getElementById('delay-slider').value = s.autoNextDelay;
   updateLobbyVal(lobbySeconds);
@@ -176,6 +194,9 @@ function updateDelayVal(v) { document.getElementById('delay-val').textContent = 
 function onLobbySlider(v) { lobbySeconds = +v; updateLobbyVal(+v); updatePresets('lobby', +v); }
 function onQSlider(v) { qSeconds = +v; updateQVal(+v); updatePresets('q', +v); }
 function onDelaySlider(v) { updateDelayVal(+v); }
+function onRevealSlider(v) { updateRevealVal(+v); updatePresets('reveal', +v); }
+function updateRevealVal(v) { document.getElementById('reveal-val').textContent = (v/1000).toFixed(1)+' sek'; }
+function setReveal(v) { document.getElementById('reveal-slider').value=v; updateRevealVal(v); updatePresets('reveal',v); }
 
 function setLobby(v) { lobbySeconds = v; document.getElementById('lobby-slider').value = v; updateLobbyVal(v); updatePresets('lobby', v); }
 function setQ(v) { qSeconds = v; document.getElementById('q-slider').value = v; updateQVal(v); updatePresets('q', v); }
@@ -183,8 +204,9 @@ function setQ(v) { qSeconds = v; document.getElementById('q-slider').value = v; 
 function updatePresets(type, val) {
   const lobbyPresetVals = [5*60, 9*60+30, 10*60, 15*60];
   const qPresetVals = [10, 15, 20, 30];
-  const vals = type === 'lobby' ? lobbyPresetVals : qPresetVals;
-  const presets = document.querySelectorAll(`.card:nth-child(${type==='lobby'?1:2}) .preset`);
+  const revealPresetVals = [1500, 2500, 4000, 6000];
+  const vals = type==='lobby'?lobbyPresetVals:type==='q'?qPresetVals:revealPresetVals;
+  const presets = document.querySelectorAll(`[data-type="${type}"] .preset`);
   presets.forEach((p, i) => p.classList.toggle('active', vals[i] === val));
 }
 
@@ -208,6 +230,7 @@ function save() {
     autoReveal: document.getElementById('auto-reveal').checked,
     autoNext: document.getElementById('auto-next').checked,
     autoNextDelay: +document.getElementById('delay-slider').value,
+    revealDuration: +document.getElementById('reveal-slider').value,
   };
   fetch('/api/settings', {
     method: 'POST',
