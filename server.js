@@ -2,144 +2,80 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const { exec } = require('child_process');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Webhook secret - pakeisk i savo
+const WEBHOOK_SECRET = 'eurovizija2026';
+
+// Webhook endpoint TURI buti pries express.static!
+app.use('/webhook', express.json({
+  verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); }
+}));
+
+app.post('/webhook', (req, res) => {
+  const sig = req.headers['x-hub-signature-256'];
+  const hmac = 'sha256=' + crypto.createHmac('sha256', WEBHOOK_SECRET).update(req.rawBody || '').digest('hex');
+
+  if (!sig || sig !== hmac) {
+    console.log('Webhook: neteisingas parasas');
+    return res.status(403).send('Forbidden');
+  }
+
+  res.status(200).send('OK');
+  console.log('Webhook gautas - atnaujinama...');
+
+  exec('cd /var/www/eurovizija && git pull origin main && systemctl restart eurovizija', (err, stdout, stderr) => {
+    if (err) console.error('Webhook klaida:', err);
+    else console.log('Auto-update sekmingai:', stdout);
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.get("/host", (req, res) => res.sendFile(path.join(__dirname, 'public', 'host.html')));
 
-// opts: array of answer strings, correct: index of correct answer
-// 2, 3, or 4 options per question - just change the opts array length
 const ROUNDS = [
   {
     name: "1 etapas: Istorija",
     questions: [
-      {
-        q: "Kiek kartų Švedija laimėjo Euroviziją?",
-        opts: ["5 kartus", "6 kartus", "7 kartus", "8 kartus"],
-        correct: 2,
-        fact: "Švedija laimėjo 1974, 1984, 1991, 1999, 2012, 2015 ir 2023 m. – daugiausia istorijoje!"
-      },
-      {
-        q: "Ar Sovietų Sąjunga kada nors dalyvavo Eurovizijoje?",
-        opts: ["Taip", "Ne"],
-        correct: 1,
-        fact: "SSRS niekada nedalyvavo – konkursas buvo laikomas Vakarų propaganda. Rusija debiutavo tik 1994 m."
-      },
-      {
-        q: "Kuri šalis laimėjo pirmąją Euroviziją 1956 m.?",
-        opts: ["Prancūzija", "Italija", "Šveicarija", "Vokietija"],
-        correct: 2,
-        fact: "Šveicarija laimėjo su Lys Assia ir daina 'Refrain' pirmajame konkurse Lugane."
-      },
-      {
-        q: "Kokia aukščiausia vieta, kurią Lietuva užėmė Eurovizijoje?",
-        opts: ["3 vieta", "6 vieta", "8 vieta"],
-        correct: 1,
-        fact: "LT United 2006 m. su 'We Are The Winners' – 6 vieta. The Roop 2021 m. užėmė 8 vietą."
-      },
-      {
-        q: "Kuri dingusi valstybė laimėjo Euroviziją 1989 m.?",
-        opts: ["Čekoslovakija", "Rytų Vokietija", "Jugoslavija", "Sovietų Sąjunga"],
-        correct: 2,
-        fact: "Jugoslavija laimėjo su Riva ir 'Rock Me'. Vos po dvejų metų šalis žlugo."
-      },
-      {
-        q: "Kiek kartų Airija laimėjo Euroviziją?",
-        opts: ["5 kartus", "7 kartus", "9 kartus"],
-        correct: 1,
-        fact: "Airija laimėjo 7 kartus – tiek pat kiek Švedija! 1992–1994 m. laimėjo tris kartus iš eilės."
-      },
+      { q: "Kiek kartų Švedija laimėjo Euroviziją?", opts: ["5 kartus", "6 kartus", "7 kartus", "8 kartus"], correct: 2, fact: "Švedija laimėjo 1974, 1984, 1991, 1999, 2012, 2015 ir 2023 m. – daugiausia istorijoje!" },
+      { q: "Ar Sovietų Sąjunga kada nors dalyvavo Eurovizijoje?", opts: ["Taip", "Ne"], correct: 1, fact: "SSRS niekada nedalyvavo – konkursas buvo laikomas Vakarų propaganda. Rusija debiutavo tik 1994 m." },
+      { q: "Kuri šalis laimėjo pirmąją Euroviziją 1956 m.?", opts: ["Prancūzija", "Italija", "Šveicarija", "Vokietija"], correct: 2, fact: "Šveicarija laimėjo su Lys Assia ir daina 'Refrain' pirmajame konkurse Lugane." },
+      { q: "Kokia aukščiausia vieta, kurią Lietuva užėmė Eurovizijoje?", opts: ["3 vieta", "6 vieta", "8 vieta"], correct: 1, fact: "LT United 2006 m. su 'We Are The Winners' – 6 vieta. The Roop 2021 m. užėmė 8 vietą." },
+      { q: "Kuri dingusi valstybė laimėjo Euroviziją 1989 m.?", opts: ["Čekoslovakija", "Rytų Vokietija", "Jugoslavija", "Sovietų Sąjunga"], correct: 2, fact: "Jugoslavija laimėjo su Riva ir 'Rock Me'. Vos po dvejų metų šalis žlugo." },
+      { q: "Kiek kartų Airija laimėjo Euroviziją?", opts: ["5 kartus", "7 kartus", "9 kartus"], correct: 1, fact: "Airija laimėjo 7 kartus – tiek pat kiek Švedija! 1992–1994 m. laimėjo tris kartus iš eilės." },
     ]
   },
   {
     name: "2 etapas: Lietuva",
     questions: [
-      {
-        q: "Kiek kartų Aistė Pilvelytė dalyvavo nacionalinėje atrankoje?",
-        opts: ["4 kartus", "7 kartus", "9 kartus", "11 kartų"],
-        correct: 3,
-        fact: "11 kartų! Aistė Pilvelytė tapo savotišku lietuviško Eurovizijos humoro simboliu."
-      },
-      {
-        q: "Kuriais metais Lietuva debiutavo Eurovizijoje?",
-        opts: ["1992 m.", "1994 m.", "1996 m."],
-        correct: 1,
-        fact: "Lietuva pirmą kartą dalyvavo 1994 m. Dublino konkurse – netrukus po Nepriklausomybės atkūrimo."
-      },
-      {
-        q: "Ar Lietuva kada nors surengė Euroviziją?",
-        opts: ["Taip", "Ne"],
-        correct: 1,
-        fact: "Ne – Lietuva dar nėra laimėjusi Eurovizijos, todėl ir niekada jos nerengė."
-      },
-      {
-        q: "Kas atstovavo Lietuvai 2021 m. Eurovizijoje?",
-        opts: ["Fusedmarc", "Jurij Veklenko", "The Roop", "Monika Liu"],
-        correct: 2,
-        fact: "The Roop su 'Discoteque' užėmė puikią 8 vietą Roterdame – tai buvo vienas ryškiausių pasirodymų."
-      },
-      {
-        q: "Kaip vadinosi grupė, kuri Lietuvai atnešė 6 vietą 2006 m.?",
-        opts: ["Skamp", "LT United", "InCulto", "Donny Montell"],
-        correct: 1,
-        fact: "'We Are The Winners' – tai turbūt žinomiausias Lietuvos Eurovizijos momentas."
-      },
+      { q: "Kiek kartų Aistė Pilvelytė dalyvavo nacionalinėje atrankoje?", opts: ["4 kartus", "7 kartus", "9 kartus", "11 kartų"], correct: 3, fact: "11 kartų! Aistė Pilvelytė tapo savotišku lietuviško Eurovizijos humoro simboliu." },
+      { q: "Kuriais metais Lietuva debiutavo Eurovizijoje?", opts: ["1992 m.", "1994 m.", "1996 m."], correct: 1, fact: "Lietuva pirmą kartą dalyvavo 1994 m. Dublino konkurse – netrukus po Nepriklausomybės atkūrimo." },
+      { q: "Ar Lietuva kada nors surengė Euroviziją?", opts: ["Taip", "Ne"], correct: 1, fact: "Ne – Lietuva dar nėra laimėjusi Eurovizijos, todėl ir niekada jos nerengė." },
+      { q: "Kas atstovavo Lietuvai 2021 m. Eurovizijoje?", opts: ["Fusedmarc", "Jurij Veklenko", "The Roop", "Monika Liu"], correct: 2, fact: "The Roop su 'Discoteque' užėmė puikią 8 vietą Roterdame – tai buvo vienas ryškiausių pasirodymų." },
+      { q: "Kaip vadinosi grupė, kuri Lietuvai atnešė 6 vietą 2006 m.?", opts: ["Skamp", "LT United", "InCulto", "Donny Montell"], correct: 1, fact: "'We Are The Winners' – tai turbūt žinomiausias Lietuvos Eurovizijos momentas." },
     ]
   },
   {
     name: "3 etapas: ABBA ir faktai",
     questions: [
-      {
-        q: "Kuriais metais ABBA laimėjo Euroviziją?",
-        opts: ["1972 m.", "1974 m.", "1976 m.", "1978 m."],
-        correct: 1,
-        fact: "ABBA laimėjo 1974 m. Braitone su 'Waterloo'. Tai paleido vieną sėkmingiausių grupių karjerą."
-      },
-      {
-        q: "Kokioje šalyje ABBA atstovavo Eurovizijoje?",
-        opts: ["Norvegijai", "Danijai", "Švedijai", "Suomijai"],
-        correct: 2,
-        fact: "ABBA atstovavo Švedijai – tai viena iš priežasčių, kodėl Švedija asocijuojasi su Eurovizija."
-      },
-      {
-        q: "Kiek taškų yra didžiausias balas Eurovizijoje?",
-        opts: ["10 taškų", "12 taškų", "15 taškų"],
-        correct: 1,
-        fact: "'Douze points!' – 12 taškų yra didžiausias balas. Šis šauksmas tapo Eurovizijos simboliu."
-      },
-      {
-        q: "Kuriais metais Ukraina pirmą kartą laimėjo Euroviziją?",
-        opts: ["2002 m.", "2004 m.", "2008 m.", "2010 m."],
-        correct: 1,
-        fact: "Ruslana su 'Wild Dances' 2004 m. Stambule. Ukraina laimėjo dar 2016 ir 2022 m."
-      },
-      {
-        q: "Kurioje šalyje pirmą kartą vyko Eurovizija?",
-        opts: ["Prancūzijoje", "JK", "Šveicarijoje", "Italijoje"],
-        correct: 2,
-        fact: "1956 m. Lugane, Šveicarijoje. EBU sukūrė konkursą suvienyti pokario Europą per televiziją."
-      },
-      {
-        q: "Kuri šalis daugiausiai kartų gavo 0 taškų (nul points)?",
-        opts: ["Norvegija", "Prancūzija", "Austrija", "Vokietija"],
-        correct: 0,
-        fact: "Norvegija gavo 0 taškų net 4 kartus – daugiau nei bet kuri kita šalis! Tačiau ji taip pat laimėjo 3 kartus."
-      },
+      { q: "Kuriais metais ABBA laimėjo Euroviziją?", opts: ["1972 m.", "1974 m.", "1976 m.", "1978 m."], correct: 1, fact: "ABBA laimėjo 1974 m. Braitone su 'Waterloo'. Tai paleido vieną sėkmingiausių grupių karjerą." },
+      { q: "Kokioje šalyje ABBA atstovavo Eurovizijoje?", opts: ["Norvegijai", "Danijai", "Švedijai", "Suomijai"], correct: 2, fact: "ABBA atstovavo Švedijai – tai viena iš priežasčių, kodėl Švedija asocijuojasi su Eurovizija." },
+      { q: "Kiek taškų yra didžiausias balas Eurovizijoje?", opts: ["10 taškų", "12 taškų", "15 taškų"], correct: 1, fact: "'Douze points!' – 12 taškų yra didžiausias balas. Šis šauksmas tapo Eurovizijos simboliu." },
+      { q: "Kuriais metais Ukraina pirmą kartą laimėjo Euroviziją?", opts: ["2002 m.", "2004 m.", "2008 m.", "2010 m."], correct: 1, fact: "Ruslana su 'Wild Dances' 2004 m. Stambule. Ukraina laimėjo dar 2016 ir 2022 m." },
+      { q: "Kurioje šalyje pirmą kartą vyko Eurovizija?", opts: ["Prancūzijoje", "JK", "Šveicarijoje", "Italijoje"], correct: 2, fact: "1956 m. Lugane, Šveicarijoje. EBU sukūrė konkursą suvienyti pokario Europą per televiziją." },
+      { q: "Kuri šalis daugiausiai kartų gavo 0 taškų (nul points)?", opts: ["Norvegija", "Prancūzija", "Austrija", "Vokietija"], correct: 0, fact: "Norvegija gavo 0 taškų net 4 kartus – daugiau nei bet kuri kita šalis! Tačiau ji taip pat laimėjo 3 kartus." },
     ]
   }
 ];
 
 let gameState = {
-  phase: 'lobby',
-  players: {},
-  round: 0,
-  question: 0,
-  answerRevealed: false,
-  answers: {},
-  scores: {},
+  phase: 'lobby', players: {}, round: 0, question: 0,
+  answerRevealed: false, answers: {}, scores: {},
 };
 
 function resetGame() {
@@ -242,31 +178,6 @@ io.on('connection', (socket) => {
     if (gameState.players[socket.id]) { delete gameState.players[socket.id]; io.emit('state', getPublicState()); }
   });
 });
-
-// Webhook auto-update
-const { exec } = require('child_process');
-const crypto = require('crypto');
-
-const WEBHOOK_SECRET = 'eurovizija2026'; // pakeisk į savo slaptazodi
-
-app.post('/webhook', (req, res) => {
-  const sig = req.headers['x-hub-signature-256'];
-  const body = JSON.stringify(req.body);
-  const hmac = 'sha256=' + crypto.createHmac('sha256', WEBHOOK_SECRET).update(body).digest('hex');
-  
-  if (sig !== hmac) {
-    return res.status(403).send('Forbidden');
-  }
-  
-  res.status(200).send('OK');
-  
-  exec('cd /var/www/eurovizija && git pull origin main && systemctl restart eurovizija', (err, stdout, stderr) => {
-    if (err) console.error('Webhook klaida:', err);
-    else console.log('Auto-update sekmingai:', stdout);
-  });
-});
-
-app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
