@@ -317,6 +317,11 @@ io.on('connection', (socket) => {
     io.emit('state', getPublicState());
   });
 
+  // Zaidejas praše esamo laiko (po reconnect)
+  socket.on('get_lobby_time', () => {
+    socket.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+  });
+
   socket.on('player:blur', () => {
     if (!gameState.players[socket.id]) return;
     gameState.cheaters[socket.id] = (gameState.cheaters[socket.id] || 0) + 1;
