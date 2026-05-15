@@ -227,6 +227,12 @@ function nextQuestion() {
 // ── SOCKET.IO ─────────────────────────────────────
 io.on('connection', (socket) => {
   const isHost = socket.handshake.query.role === 'host';
+  
+  // Siusti esama laika visiems iš karto kai prisijungia (dar pries varda)
+  if (gameState.phase === 'lobby') {
+    socket.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+  }
+
   if (isHost) {
     socket.join('host');
     socket.emit('state', getPublicState());
