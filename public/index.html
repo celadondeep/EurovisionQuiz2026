@@ -122,6 +122,7 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
     <div class="q-timer-bar"><div class="q-timer-fill" id="q-timer-fill" style="width:100%"></div></div>
     <div class="q-timer-num" id="q-timer-num">15</div>
   </div>
+  <div id="reveal-overlay" style="display:none;text-align:center;font-size:1.3rem;font-weight:700;margin-bottom:.75rem;padding:.5rem;border-radius:10px;background:rgba(0,0,0,.3);" id="reveal-overlay"><span id="reveal-overlay-text"></span></div>
   <div class="q-text-player" id="q-text-player"></div>
   <div class="q-status" id="q-status"></div>
   <div class="opts" id="q-opts"></div>
@@ -291,19 +292,21 @@ function handleState(s){
 
     if(s.answerRevealed && !wasRevealed){
       wasRevealed = true;
+      // Visada rodyti mygtukus su teisingu/neteisingu pazymejimi
+      renderOpts(s, myAns, true);
+      setScreen('s-question');
       if(myAns){
         const correct = myAns.optionIndex === s.correctIndex;
-        setText('reveal-emoji', correct?'🎉':'😔');
-        setText('reveal-text', correct?'Teisingai!':'Neteisingai');
-        setText('reveal-score', `Taškai: ${s.scores?.[myId]||0}`);
         if(correct){ playCorrect(); vibrate(true); }
-        else{ playWrong(); vibrate(false); }
-        setScreen('s-reveal');
-      } else {
-        renderOpts(s, null, true);
-        setScreen('s-question');
+        // Rodyti rezultata virsu mygtuku
+        setText('reveal-overlay-text', correct?'🎉 Teisingai!':'😔 Neteisingai');
+        document.getElementById('reveal-overlay').style.display='block';
       }
-      setTimeout(()=>{ renderLb(s); setScreen('s-lb'); }, 2500);
+      setTimeout(()=>{
+        document.getElementById('reveal-overlay').style.display='none';
+        renderLb(s);
+        setScreen('s-lb');
+      }, 2500);
       return;
     }
 
