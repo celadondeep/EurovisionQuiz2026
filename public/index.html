@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="lt">
 <head>
@@ -223,24 +224,24 @@ document.addEventListener('visibilitychange', () => {
 });
 
 
-// Prisijungti anksti tik gauti laika (pries ivesti varda)
-const earlySocket = io();
-earlySocket.on('lobby_timer', ({timeLeft}) => {
-  const m=Math.floor(timeLeft/60),s=timeLeft%60;
+// Prisijungiame is karto puslapiui atsidarius - tik gauti laika
+const preSocket = io();
+preSocket.on('lobby_timer', ({timeLeft}) => {
+  const m=Math.floor(timeLeft/60), s=timeLeft%60;
   const fmt=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  const jc=document.getElementById('join-countdown');
-  const wc=document.getElementById('wait-countdown');
-  if(jc){jc.textContent=fmt;jc.classList.toggle('urgent',timeLeft<=60);}
-  if(wc){wc.textContent=fmt;wc.classList.toggle('urgent',timeLeft<=60);}
+  ['join-countdown','wait-countdown'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=fmt;el.classList.toggle('urgent',timeLeft<=60);}
+  });
 });
 
 function join(){
   const name = document.getElementById('name-input').value.trim();
   if(!name) return;
   myName = name;
-  socket = earlySocket;
+  socket = preSocket; // naudojame jau esama rysio
+  socket.emit('join', {name});
   socket.on('connect', ()=>{ myId = socket.id; socket.emit('join', {name}); });
-  if(socket.connected){ myId = socket.id; socket.emit('join', {name}); }
   socket.on('joined', ({id})=>{ myId = id; setScreen('s-wait'); });
   socket.on('join_error', ({message})=>{
     const inp=document.getElementById('name-input');
