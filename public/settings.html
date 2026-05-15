@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nustatymai – Eurovizija Quiz</title>
+<style>
+:root{--bg:#0d0b1a;--s:#16132a;--s2:#1e1a35;--bd:rgba(255,255,255,0.08);--pu:#7c5cfc;--pl:#a68dff;--gr:#3ecf8e;--re:#ff5c5c;--tx:#f0eeff;--mu:rgba(240,238,255,0.45)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh;padding:2rem 1rem;}
+.wrap{max-width:480px;margin:0 auto;}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:2rem;}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--pu);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;}
+.title{font-size:1.2rem;font-weight:700;}
+.subtitle{font-size:.8rem;color:var(--mu);}
+.back{margin-left:auto;padding:6px 14px;border-radius:8px;background:var(--s2);border:.5px solid var(--bd);color:var(--mu);font-size:12px;text-decoration:none;font-weight:500;}
+.card{background:var(--s);border:.5px solid var(--bd);border-radius:14px;padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:.7rem;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;margin-bottom:1rem;font-weight:500;}
+.field{margin-bottom:1rem;}
+.field:last-child{margin-bottom:0;}
+.label{font-size:.85rem;font-weight:500;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;}
+.label span{font-size:.8rem;color:var(--pl);font-weight:700;}
+.presets{display:flex;gap:6px;margin-bottom:.5rem;flex-wrap:wrap;}
+.preset{padding:5px 12px;border-radius:6px;font-size:.8rem;background:var(--s2);border:.5px solid var(--bd);color:var(--mu);cursor:pointer;font-weight:500;}
+.preset.active{background:rgba(124,92,252,.2);border-color:var(--pu);color:var(--pl);}
+.slider{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--s2);outline:none;}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--pu);cursor:pointer;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:.5px solid var(--bd);}
+.toggle-row:last-child{border:none;}
+.toggle-label{font-size:.9rem;font-weight:500;}
+.toggle-sub{font-size:.75rem;color:var(--mu);margin-top:2px;}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--s2);border-radius:12px;cursor:pointer;transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+input:checked + .toggle-slider{background:var(--pu);}
+input:checked + .toggle-slider:before{transform:translateX(20px);}
+.delay-field{margin-top:.75rem;display:none;}
+.delay-field.show{display:block;}
+.btn-save{width:100%;padding:14px;border-radius:12px;background:var(--pu);border:none;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1rem;}
+.btn-save:active{opacity:.8;}
+.saved{text-align:center;font-size:.85rem;color:var(--gr);margin-top:.75rem;opacity:0;transition:opacity .3s;}
+.saved.show{opacity:1;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat{background:var(--s2);border-radius:10px;padding:.75rem;text-align:center;}
+.stat-n{font-size:1.5rem;font-weight:700;color:var(--pl);}
+.stat-l{font-size:.7rem;color:var(--mu);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">E</div>
+    <div>
+      <div class="title">Nustatymai</div>
+      <div class="subtitle">Eurovizija PopQuiznas</div>
+    </div>
+    <a class="back" href="/host">← Grįžti</a>
+  </div>
+
+  <!-- LOBIIO LAIKAS -->
+  <div class="card">
+    <div class="card-title">Lobiio laikas</div>
+    <div class="field">
+      <div class="label">Laikas iki žaidimo pradžios <span id="lobby-val">9:30</span></div>
+      <div class="presets">
+        <div class="preset" onclick="setLobby(5*60)">5 min</div>
+        <div class="preset active" onclick="setLobby(9*60+30)">9:30</div>
+        <div class="preset" onclick="setLobby(10*60)">10 min</div>
+        <div class="preset" onclick="setLobby(15*60)">15 min</div>
+      </div>
+      <input class="slider" type="range" id="lobby-slider" min="60" max="1800" step="30" value="570" oninput="onLobbySlider(this.value)">
+    </div>
+  </div>
+
+  <!-- KLAUSIMO LAIKAS -->
+  <div class="card">
+    <div class="card-title">Klausimo laikas</div>
+    <div class="field">
+      <div class="label">Laikas atsakyti klausimui <span id="q-val">15 sek</span></div>
+      <div class="presets">
+        <div class="preset" onclick="setQ(10)">10 sek</div>
+        <div class="preset active" onclick="setQ(15)">15 sek</div>
+        <div class="preset" onclick="setQ(20)">20 sek</div>
+        <div class="preset" onclick="setQ(30)">30 sek</div>
+      </div>
+      <input class="slider" type="range" id="q-slider" min="5" max="60" step="5" value="15" oninput="onQSlider(this.value)">
+    </div>
+  </div>
+
+  <!-- AUTO NUSTATYMAI -->
+  <div class="card">
+    <div class="card-title">Automatika</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Auto-atskleidimas</div>
+        <div class="toggle-sub">Automatiškai atskleisti atsakymą kai laikas baigiasi</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="auto-reveal" checked onchange="toggleAutoNext()"><div class="toggle-slider"></div></label>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Auto-kitas</div>
+        <div class="toggle-sub">Automatiškai eiti į kitą klausimą po atskleidimo</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="auto-next" checked onchange="toggleDelay()"><div class="toggle-slider"></div></label>
+    </div>
+    <div class="delay-field show" id="delay-field">
+      <div class="label" style="margin-top:.5rem">Pauzė prieš kitą klausimą <span id="delay-val">3 sek</span></div>
+      <input class="slider" type="range" id="delay-slider" min="1" max="10" step="1" value="3" oninput="onDelaySlider(this.value)">
+    </div>
+  </div>
+
+  <!-- ANTI-CHEAT STATISTIKA -->
+  <div class="card" id="cheat-card">
+    <div class="card-title">Anti-cheat statistika</div>
+    <div id="cheat-stats"><div style="font-size:.85rem;color:var(--mu)">Žaidimas dar neprasidėjo</div></div>
+  </div>
+
+  <button class="btn-save" onclick="save()">Išsaugoti nustatymus</button>
+  <div class="saved" id="saved-msg">✓ Išsaugota sėkmingai!</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io({ query: { role: 'host' } });
+let lobbySeconds = 9 * 60 + 30;
+let qSeconds = 15;
+
+// Load current settings
+fetch('/api/settings').then(r => r.json()).then(s => {
+  lobbySeconds = s.lobbySeconds;
+  qSeconds = s.questionSeconds;
+  document.getElementById('lobby-slider').value = lobbySeconds;
+  document.getElementById('q-slider').value = qSeconds;
+  document.getElementById('auto-reveal').checked = s.autoReveal;
+  document.getElementById('auto-next').checked = s.autoNext;
+  document.getElementById('delay-slider').value = s.autoNextDelay;
+  updateLobbyVal(lobbySeconds);
+  updateQVal(qSeconds);
+  updateDelayVal(s.autoNextDelay);
+  toggleDelay();
+  toggleAutoNext();
+  updatePresets('lobby', lobbySeconds);
+  updatePresets('q', qSeconds);
+});
+
+// Anti-cheat from state
+socket.on('state', s => {
+  const cheaters = s.cheaters || {};
+  const players = Object.values(s.players || {});
+  const stats = document.getElementById('cheat-stats');
+  const entries = Object.entries(cheaters).filter(([id, count]) => count > 0);
+  if (!entries.length) {
+    stats.innerHTML = '<div style="font-size:.85rem;color:var(--mu)">Nė vienas neišėjo iš programos</div>';
+    return;
+  }
+  stats.innerHTML = entries.map(([id, count]) => {
+    const p = players.find(x => x.id === id);
+    const name = p?.name || '?';
+    const color = count >= 3 ? '#ff5c5c' : count >= 2 ? '#f5c842' : 'var(--mu)';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:.5px solid var(--bd);font-size:.85rem">
+      <span>${name}</span>
+      <span style="color:${color};font-weight:700">⚠️ ${count}x</span>
+    </div>`;
+  }).join('');
+});
+
+function updateLobbyVal(v) {
+  const m = Math.floor(v/60), s = v%60;
+  document.getElementById('lobby-val').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function updateQVal(v) { document.getElementById('q-val').textContent = v + ' sek'; }
+function updateDelayVal(v) { document.getElementById('delay-val').textContent = v + ' sek'; }
+
+function onLobbySlider(v) { lobbySeconds = +v; updateLobbyVal(+v); updatePresets('lobby', +v); }
+function onQSlider(v) { qSeconds = +v; updateQVal(+v); updatePresets('q', +v); }
+function onDelaySlider(v) { updateDelayVal(+v); }
+
+function setLobby(v) { lobbySeconds = v; document.getElementById('lobby-slider').value = v; updateLobbyVal(v); updatePresets('lobby', v); }
+function setQ(v) { qSeconds = v; document.getElementById('q-slider').value = v; updateQVal(v); updatePresets('q', v); }
+
+function updatePresets(type, val) {
+  const lobbyPresetVals = [5*60, 9*60+30, 10*60, 15*60];
+  const qPresetVals = [10, 15, 20, 30];
+  const vals = type === 'lobby' ? lobbyPresetVals : qPresetVals;
+  const presets = document.querySelectorAll(`.card:nth-child(${type==='lobby'?1:2}) .preset`);
+  presets.forEach((p, i) => p.classList.toggle('active', vals[i] === val));
+}
+
+function toggleDelay() {
+  const show = document.getElementById('auto-next').checked;
+  document.getElementById('delay-field').classList.toggle('show', show);
+}
+function toggleAutoNext() {
+  const autoReveal = document.getElementById('auto-reveal').checked;
+  document.getElementById('auto-next').disabled = !autoReveal;
+  if (!autoReveal) {
+    document.getElementById('auto-next').checked = false;
+    toggleDelay();
+  }
+}
+
+function save() {
+  const body = {
+    lobbySeconds: lobbySeconds,
+    questionSeconds: qSeconds,
+    autoReveal: document.getElementById('auto-reveal').checked,
+    autoNext: document.getElementById('auto-next').checked,
+    autoNextDelay: +document.getElementById('delay-slider').value,
+  };
+  fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then(r => r.json()).then(() => {
+    const msg = document.getElementById('saved-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2500);
+  });
+}
+</script>
+</body>
+</html>

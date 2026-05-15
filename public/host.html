@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eurovizija Quiz – Vedejas</title>
+<title>Eurovizija Quiz – Vedėjas</title>
 <style>
 :root{--bg:#0d0b1a;--s:#16132a;--s2:#1e1a35;--bd:rgba(255,255,255,0.08);--pu:#7c5cfc;--pl:#a68dff;--go:#f5c842;--gr:#3ecf8e;--re:#ff5c5c;--tx:#f0eeff;--mu:rgba(240,238,255,0.45)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -99,15 +99,16 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
   <div class="sidebar" id="main-sidebar">
     <div class="logo-row">
       <div class="logo">E</div>
-      <div class="app-title">Vedejas</div>
+      <div class="app-title">Vedėjas</div>
       <span class="badge" id="ph-badge">Lobby</span>
     </div>
-    <div class="sec">Zaidejai (<span id="stat-p">0</span>)</div>
+    <div class="sec">Žaidėjai (<span id="stat-p">0</span>)</div>
     <div id="players-list"><div style="font-size:11px;color:var(--mu);padding:.25rem 0">Laukiama...</div></div>
     <div class="sec">Anti-cheat</div>
     <div class="cheat-list" id="cheat-list"><div style="font-size:11px;color:var(--mu)">Nieko</div></div>
     <div style="margin-top:auto;padding-top:.5rem">
-      <button class="btn btn-re" style="width:100%;font-size:11px" onclick="if(confirm('Is naujo?'))socket.emit('host:reset')">Naujas zaidimas</button>
+      <a href="/settings" style="display:block;width:100%;padding:7px 14px;border-radius:8px;background:var(--s2);border:.5px solid var(--bd);color:var(--mu);font-size:11px;font-weight:500;text-align:center;text-decoration:none;margin-bottom:6px;">⚙️ Nustatymai</a>
+      <button class="btn btn-re" style="width:100%;font-size:11px" onclick="if(confirm('Iš naujo?'))socket.emit('host:reset')">Naujas žaidimas</button>
     </div>
   </div>
 
@@ -117,13 +118,18 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
     <div class="ph active" id="ph-lobby">
       <div class="lobby-bg"></div>
       <div class="lobby-overlay"></div>
-      <div class="music-hint" id="music-hint" onclick="startMusic()">♪ spusk muzikai</div>
+      <div class="music-hint" id="music-hint" onclick="startMusic()">♪ spausk muzikai</div>
       <div class="lobby-content">
         <div class="lobby-title">Eurovizijos <strong>PopQuiznas</strong></div>
         <div class="lobby-year">Viena · 2026</div>
         <div class="lobby-countdown" id="countdown">9:30</div>
-        <div class="lobby-countdown-lbl">iki pradzios</div>
-        <div class="lobby-players">Prisijunge: <span id="lobby-count">0</span></div>
+        <div class="lobby-countdown-lbl">iki pradžios</div>
+        <div class="lobby-players">Prisijungę: <span id="lobby-count">0</span></div>
+        <div style="display:flex;gap:.5rem;margin-top:1.5rem;">
+          <button onclick="socket.emit('host:lobby_pause')" style="padding:.5rem 1rem;border-radius:50px;border:.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:.8rem;cursor:pointer;">⏸ Pauzė</button>
+          <button onclick="socket.emit('host:lobby_resume')" style="padding:.5rem 1rem;border-radius:50px;border:.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:.8rem;cursor:pointer;">▶ Tęsti</button>
+          <button onclick="socket.emit('host:start')" style="padding:.5rem 1rem;border-radius:50px;border:none;background:#fff;color:#07061a;font-size:.8rem;font-weight:700;cursor:pointer;">Pradėti →</button>
+        </div>
       </div>
       <iframe id="yt-player" width="1" height="1" style="position:absolute;opacity:0.01;pointer-events:none;bottom:0;left:0" src="about:blank" allow="autoplay" frameborder="0"></iframe>
     </div>
@@ -140,11 +146,11 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <div class="q-text" id="q-text"></div>
         <div id="opts-area"></div>
         <div class="fact-box" id="fact-box" style="display:none">
-          <div class="fact-l">Idomu zinoti</div>
+          <div class="fact-l">Įdomu žinoti</div>
           <div class="fact-t" id="fact-text"></div>
         </div>
         <div style="margin-bottom:.75rem">
-          <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">Atsake (<span id="ans-count">0</span>/<span id="ans-total">0</span>)</div>
+          <div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">Atsakė (<span id="ans-count">0</span>/<span id="ans-total">0</span>)</div>
           <div class="ans-grid" id="ans-grid"></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -157,10 +163,10 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 
     <!-- LB -->
     <div class="ph" id="ph-lb">
-      <div style="font-size:16px;font-weight:700;margin-bottom:1rem">Rikiuote</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:1rem">Rikiuotė</div>
       <div id="lb-content"></div>
       <div style="display:flex;gap:8px;margin-top:1rem">
-        <button class="btn btn-gray" onclick="showQ()">Grizti</button>
+        <button class="btn btn-gray" onclick="showQ()">Grįžti</button>
         <button class="btn btn-pu" onclick="socket.emit('host:next')">Kitas klausimas</button>
       </div>
     </div>
@@ -169,10 +175,10 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
     <div class="ph" id="ph-final">
       <div style="text-align:center;padding:2rem 1rem;max-width:400px;margin:0 auto">
         <div style="font-size:52px;margin-bottom:1rem">🏆</div>
-        <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">Zaidimas baigtas!</div>
-        <div style="font-size:13px;color:var(--mu);margin-bottom:1.5rem">Galutine rikiuote</div>
+        <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">Žaidimas baigtas!</div>
+        <div style="font-size:13px;color:var(--mu);margin-bottom:1.5rem">Galutinė rikiuotė</div>
         <div id="final-lb"></div>
-        <button class="btn btn-pu" style="margin-top:1rem;padding:10px 24px" onclick="if(confirm('Is naujo?'))socket.emit('host:reset')">Naujas zaidimas</button>
+        <button class="btn btn-pu" style="margin-top:1rem;padding:10px 24px" onclick="if(confirm('Iš naujo?'))socket.emit('host:reset')">Naujas žaidimas</button>
       </div>
     </div>
 
@@ -190,7 +196,7 @@ socket.on('cheat_alert',({name,count})=>{
   const list=document.getElementById('cheat-list');
   const item=document.createElement('div');
   item.className='cheat-item';
-  item.textContent=`${name} isejo is programos (${count}x)`;
+  item.textContent=`${name} išėjo iš programos (${count}x)`;
   list.innerHTML='';
   list.appendChild(item);
   setTimeout(()=>{if(list.contains(item))list.removeChild(item);},8000);
@@ -267,7 +273,7 @@ function render(){
         <span class="p-pts">${scores[p.id]||0}</span>
       </div>`;
     }).join('')
-    :'<div style="font-size:11px;color:var(--mu);padding:.25rem 0">Laukiama zaideju...</div>';
+    :'<div style="font-size:11px;color:var(--mu);padding:.25rem 0">Laukiama žaidėjų...</div>';
 
   ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
   setLobbyLayout(phase==='lobby');

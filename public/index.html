@@ -107,7 +107,7 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
   <div class="join-title">Eurovizijos <strong>PopQuiznas</strong></div>
   <div class="join-sub">Viena · 2026</div>
   <div class="join-countdown" id="join-countdown">9:30</div>
-  <div class="join-countdown-lbl">iki pradzios</div>
+  <div class="join-countdown-lbl">iki pradžios</div>
   <input class="join-input" id="name-input" type="text" placeholder="Tavo vardas" maxlength="20" autocomplete="off" onkeyup="if(event.key==='Enter')join()">
   <button class="join-btn" onclick="join()">Prisijungti</button>
   <div class="players-list" id="players-list"></div>
@@ -117,7 +117,9 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
 <div class="screen" id="s-wait">
   <div class="wait-icon">🎤</div>
   <div class="wait-title">Prisijungei!</div>
-  <div class="wait-sub">Laukiama pradzios...</div>
+  <div class="wait-sub" id="wait-sub">Laukiama pradžios...</div>
+  <div class="join-countdown" id="wait-countdown" style="margin-top:1.5rem"></div>
+  <div class="join-countdown-lbl">iki pradžios</div>
 </div>
 
 <!-- QUESTION -->
@@ -126,6 +128,7 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
     <div class="q-timer-bar"><div class="q-timer-fill" id="q-timer-fill" style="width:100%"></div></div>
     <div class="q-timer-num" id="q-timer-num">15</div>
   </div>
+  <div class="q-text-player" id="q-text-player" style="font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:1.25rem;line-height:1.4;color:#fff;"></div>
   <div class="q-status" id="q-status"></div>
   <div id="q-opts" style="width:100%"></div>
 </div>
@@ -147,7 +150,7 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
 
 <!-- LB -->
 <div class="screen" id="s-lb">
-  <div class="lb-title">Rikiuote</div>
+  <div class="lb-title">Rikiuotė</div>
   <div id="lb-list" style="width:100%"></div>
 </div>
 
@@ -164,7 +167,7 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
 const LETTERS = ['A','B','C','D'];
 let socket, myId, myName, myLastOpt = null;
 let lastQ = -1, lastRound = -1;
-let lobbySeconds = 9 * 60 + 30;
+let lobbySeconds = 9 * 60 + 30; // will be synced from server
 let lobbyInterval;
 let currentTimeLeft = 15;
 let wasRevealed = false;
@@ -223,6 +226,7 @@ document.addEventListener('visibilitychange', () => {
 function startLobbyCountdown(){
   lobbyInterval = setInterval(()=>{
     lobbySeconds--;
+    updateWaitCountdown();
     if(lobbySeconds < 0){ clearInterval(lobbyInterval); return; }
     const m = Math.floor(lobbySeconds/60), s = lobbySeconds%60;
     const el = document.getElementById('join-countdown');
@@ -240,8 +244,24 @@ function join(){
   socket = io();
   socket.on('connect', ()=>{ myId = socket.id; socket.emit('join', {name}); });
   socket.on('joined', ({id})=>{ myId = id; setScreen('s-wait'); });
+  socket.on('join_error', ({message})=>{
+    const inp=document.getElementById('name-input');
+    inp.style.borderColor='#ff5c5c';
+    inp.placeholder=message;
+    inp.value='';
+    setTimeout(()=>{inp.style.borderColor='';inp.placeholder='Tavo vardas';},3000);
+  });
   socket.on('state', handleState);
-  socket.on('timer', ({timeLeft})=>{
+  socket.on("lobby_timer", ({timeLeft}) => {
+  lobbySeconds = timeLeft;
+  const m=Math.floor(timeLeft/60),s=timeLeft%60;
+  const fmt=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  const jc=document.getElementById("join-countdown");
+  const wc=document.getElementById("wait-countdown");
+  if(jc){jc.textContent=fmt;jc.classList.toggle("urgent",timeLeft<=60);}
+  if(wc){wc.textContent=fmt;wc.classList.toggle("urgent",timeLeft<=60);}
+});
+socket.on("timer", ({timeLeft})=>{
     currentTimeLeft = timeLeft;
     updateTimer(timeLeft);
   });
@@ -270,7 +290,9 @@ function handleState(s){
     const answered = Object.keys(s.answers||{}).length;
 
     document.getElementById('q-status').textContent =
-      `${s.roundName} · ${s.question+1}/${s.totalQuestions} · Atsake: ${answered}/${total}`;
+      `${s.roundName} · ${s.question+1}/${s.totalQuestions} · Atsakė: ${answered}/${total}`;
+    const qt=document.getElementById('q-text-player');
+    if(qt) qt.textContent=s.questionText||'';
 
     if(s.answerRevealed && !wasRevealed){
       wasRevealed = true;
@@ -280,7 +302,7 @@ function handleState(s){
       if(answered2){
         document.getElementById('reveal-result').textContent = correct ? '🎉' : '😔';
         document.getElementById('reveal-text').textContent = correct ? 'Teisingai!' : 'Neteisingai';
-        document.getElementById('reveal-score').textContent = `Taskai: ${s.scores?.[myId]||0}`;
+        document.getElementById('reveal-score').textContent = `Taškai: ${s.scores?.[myId]||0}`;
         if(correct){ playCorrect(); vibrate(true); }
         else{ playWrong(); vibrate(false); }
         setScreen('s-reveal');
@@ -378,6 +400,14 @@ function setScreen(id){
 }
 
 startLobbyCountdown();
+
+function updateWaitCountdown(){
+  const el = document.getElementById('wait-countdown');
+  if(!el) return;
+  const m = Math.floor(lobbySeconds/60), s = lobbySeconds%60;
+  el.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  el.classList.toggle('urgent', lobbySeconds<=60);
+}
 </script>
 </body>
 </html>
