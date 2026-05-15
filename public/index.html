@@ -168,7 +168,6 @@ html,body{height:100%;background:#07061a;color:#fff;font-family:system-ui,sans-s
 const LETTERS = ['A','B','C','D'];
 let socket, myId, myName, myLastOpt = null;
 let lastQ = -1, lastRound = -1;
-let lobbySeconds = 9 * 60 + 30; // will be synced from server
 let lobbyInterval;
 let currentTimeLeft = 15;
 let wasRevealed = false;
@@ -223,20 +222,6 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// Lobby countdown
-function startLobbyCountdown(){
-  lobbyInterval = setInterval(()=>{
-    lobbySeconds--;
-    updateWaitCountdown();
-    if(lobbySeconds < 0){ clearInterval(lobbyInterval); return; }
-    const m = Math.floor(lobbySeconds/60), s = lobbySeconds%60;
-    const el = document.getElementById('join-countdown');
-    if(el){
-      el.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-      el.classList.toggle('urgent', lobbySeconds <= 60);
-    }
-  }, 1000);
-}
 
 function join(){
   const name = document.getElementById('name-input').value.trim();
@@ -254,7 +239,6 @@ function join(){
   });
   socket.on('state', handleState);
   socket.on("lobby_timer", ({timeLeft}) => {
-  lobbySeconds = timeLeft;
   const m=Math.floor(timeLeft/60),s=timeLeft%60;
   const fmt=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
   const jc=document.getElementById("join-countdown");
@@ -401,15 +385,7 @@ function setScreen(id){
   document.getElementById(id).classList.add('active');
 }
 
-startLobbyCountdown();
 
-function updateWaitCountdown(){
-  const el = document.getElementById('wait-countdown');
-  if(!el) return;
-  const m = Math.floor(lobbySeconds/60), s = lobbySeconds%60;
-  el.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  el.classList.toggle('urgent', lobbySeconds<=60);
-}
 </script>
 </body>
 </html>
