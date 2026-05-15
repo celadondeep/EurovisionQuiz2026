@@ -112,7 +112,11 @@ function resetGame() {
     lobbyTimeLeft: settings.lobbySeconds, lobbyTimer: null,
     cheaters: {},
   };
-  // Timer will start when host reconnects
+  // Jei host jau prisijunges - is karto pradeti laikmati
+  if (hostConnected) {
+    startLobbyTimer();
+    io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+  }
 }
 
 function currentQ() {
@@ -145,16 +149,17 @@ function getPublicState() {
 }
 
 // ── LOBBY TIMER ───────────────────────────────────
+let hostConnected = false;
+
 function startLobbyTimer() {
   if (gameState.lobbyTimer) clearInterval(gameState.lobbyTimer);
-  gameState.lobbyTimeLeft = settings.lobbySeconds;
   gameState.lobbyTimer = setInterval(() => {
+    if (!hostConnected) return; // neskaiciuoti jei host neprisijunges
     gameState.lobbyTimeLeft--;
     io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
     if (gameState.lobbyTimeLeft <= 0) {
       clearInterval(gameState.lobbyTimer);
       gameState.lobbyTimer = null;
-      startGame();
     }
   }, 1000);
 }
@@ -226,9 +231,15 @@ io.on('connection', (socket) => {
     socket.join('host');
     socket.emit('state', getPublicState());
     socket.emit('settings', settings);
-    // Start lobby timer when host connects (if not already running)
-    if (!gameState.lobbyTimer && gameState.phase === 'lobby') {
-      startLobbyTimer();
+    // Pradeti laikmati tik kai host prisijungia
+    if (gameState.phase === 'lobby') {
+      hostConnected = true;
+      if (!gameState.lobbyTimer) {
+        gameState.lobbyTimeLeft = settings.lobbySeconds;
+        startLobbyTimer();
+      }
+      // Siusti esamą laiką visiems žaidėjams
+      io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
     }
   }
 
@@ -310,6 +321,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    if (isHost) {
+      hostConnected = false;
+      console.log('Host atsijunge - laikmatis sustojo');
+    }
     if (gameState.players[socket.id]) { delete gameState.players[socket.id]; io.emit('state', getPublicState()); }
   });
 });
