@@ -67,14 +67,14 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
 .lb-row.top .lb-pts{color:var(--go)}
 .ph{display:none}
 .ph.active{display:block}
-.lobby-bg{position:absolute;inset:0;background-image:url("/bg.jpg");background-size:cover;background-position:center center;background-repeat:no-repeat;animation:slowzoom 20s ease-in-out infinite alternate}
+.lobby-bg{position:absolute;inset:0;background-image:url("/bg.jpg");background-size:cover;background-position:center center;background-repeat:no-repeat;animation:slowzoom 20s ease-in-out infinite alternate;z-index:0;}
 @keyframes slowzoom{from{transform:scale(1);}to{transform:scale(1.08);}}
 #ph-lobby.active{display:flex;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;background-color:#07061a;}
 .lobby-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.62);z-index:0;}
 .lobby-title{font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:200;color:#fff;letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-bottom:.3rem;opacity:.9;position:relative;z-index:2;}
 .lobby-title strong{font-weight:800;letter-spacing:.05em;}
 .lobby-year{font-size:.75rem;letter-spacing:.4em;color:rgba(255,255,255,.3);text-transform:uppercase;text-align:center;margin-bottom:3rem;position:relative;z-index:2;}
-.lobby-countdown{font-size:clamp(2rem,4vw,3.5rem);font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;text-align:center;font-variant-numeric:tabular-nums;transition:color .4s;margin-bottom:0.5rem}
+.lobby-countdown{font-size:clamp(2rem,4vw,3.5rem);font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;text-align:center;font-variant-numeric:tabular-nums;transition:color .4s;margin-bottom:.4rem;position:relative;z-index:2;opacity:.9;}
 .lobby-countdown.urgent{color:#ff6b6b;}
 .lobby-countdown-label{font-size:.65rem;letter-spacing:.3em;color:rgba(255,255,255,.25);text-transform:uppercase;text-align:center;position:relative;z-index:2;}
 .lobby-player-count{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);font-size:.7rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase;white-space:nowrap;z-index:2;}
@@ -111,7 +111,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <div class="lobby-countdown-label">iki pradzios</div>
       </div>
       <div class="lobby-player-count">prisijunge: <span id="stat-p">0</span></div>
-      <iframe id="yt-player" width="0" height="0" style="position:absolute;opacity:0;pointer-events:none" src="about:blank" allow="autoplay" frameborder="0"></iframe>
+      <audio id="bg-music" loop preload="auto"><source src="/music.mp3" type="audio/mpeg"></audio>
     </div>
     <div class="ph" id="ph-question">
       <div class="r-pills" id="r-pills"></div>
@@ -161,17 +161,19 @@ const LETTERS=['A','B','C','D'];
 let state={};
 const socket=io({query:{role:'host'}});
 socket.on('state',s=>{state=s;render();});
-const YT_SRC="https://www.youtube.com/embed/4eDwa8-lQZI?autoplay=1&start=10&loop=1&playlist=4eDwa8-lQZI&controls=0";
+
 let musicStarted=false;
 function startMusic(){
   if(musicStarted)return;
   musicStarted=true;
-  document.getElementById('yt-player').src=YT_SRC;
+  const audio=document.getElementById('bg-music');
+  audio.volume=0.5;
+  audio.play().catch(()=>{});
   const h=document.getElementById('music-hint');
   if(h)h.textContent='♪ groja';
 }
 document.addEventListener('click',function once(){startMusic();document.removeEventListener('click',once);},{once:true});
-function stopMusic(){document.getElementById('yt-player').src='about:blank';musicStarted=false;}
+function stopMusic(){document.getElementById("bg-music").pause();musicStarted=false;}
 let countdownSeconds=10*60,countdownInterval;
 function startCountdown(){
   countdownInterval=setInterval(()=>{
@@ -198,24 +200,24 @@ function render(){
   document.getElementById('ph-badge').textContent=phase==='lobby'?'Lobby':phase==='final'?'Finalas':roundName;
   document.getElementById('stat-p').textContent=playerList.length;
   const pl=document.getElementById('players-list');
-  pl.innerHTML=sorted.length?sorted.map((p,i)=>`<div class="p-row"><span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'.'}</span><span class="p-name">${p.name}</span><div class="adj-btns"><button class="adj adj-p" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:1})">+</button><button class="adj adj-m" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:-1})">-</button></div></div>`).join(''):pl.innerHTML;
+  pl.innerHTML=sorted.length?sorted.map((p,i)=>`<div class="p-row"><span style="font-size:14px;width:20px;flex-shrink:0">${medals[i]||'.'}</span><span class="p-name">${p.name}</span><div class="adj-btns"><button class="adj adj-m" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:-1})">-1</button><button class="adj adj-p" onclick="socket.emit('host:adjust',{playerId:'${p.id}',pts:1})">+1</button></div><span class="p-pts">${scores[p.id]||0}</span></div>`).join(''):'<div style="font-size:12px;color:var(--mu);padding:.5rem 0;text-align:center">Laukiama zaideju...</div>';
   ['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));
   setLobbyLayout(phase==='lobby');
   if(phase==='lobby'){document.getElementById('ph-lobby').classList.add('active');return;}
   if(phase==='question'){
     document.getElementById('ph-question').classList.add('active');
     const roundNames=['Istorija','Lietuva','ABBA ir faktai'];
-    document.getElementById('r-pills').innerHTML=Array.from({length:totalRounds||3},(_,i)=>`<button class="r-pill${i===round?' active':i<round?' done':''}" onclick="socket.emit('host:jump',{round:${i}})">${i+1}</button>`).join('');
+    document.getElementById('r-pills').innerHTML=Array.from({length:totalRounds||3},(_,i)=>`<button class="r-pill${i===round?' active':i<round?' done':''}" onclick="socket.emit('host:jump',{round:${i}})">${i+1}. ${roundNames[i]||'Etapas '+(i+1)}</button>`).join('');
     document.getElementById('prog-fill').style.width=Math.round((question/(totalQuestions||1))*100)+'%';
     document.getElementById('q-meta').textContent=`${roundName} · Klausimas ${question+1} / ${totalQuestions}`;
     document.getElementById('q-text').textContent=questionText;
     const count=(options||[]).length;
     const gridClass=count===2?'opts-grid-2':count===3?'opts-grid-3':'opts-grid-4';
-    document.getElementById('opts-area').innerHTML=`<div class="${gridClass}">`+(options||[]).map((opt,i)=>{const n=ansArr.filter(a=>a.optionIndex===i).length;const pct=ansArr.length>0?Math.round((n/ansArr.length)*100):0;const isCorr=answerRevealed&&i===correctIndex;return`<div class="opt-row${isCorr?' correct':''}"><span class="opt-letter">${LETTERS[i]}</span><span class="opt-text">${opt}</span><div class="opt-bar-wrap"><div class="opt-count">${n}</div><div class="opt-pct">${pct}%</div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div></div></div>`}).join('')+`</div>`;
+    document.getElementById('opts-area').innerHTML=`<div class="${gridClass}">`+(options||[]).map((opt,i)=>{const n=ansArr.filter(a=>a.optionIndex===i).length;const pct=ansArr.length>0?Math.round((n/ansArr.length)*100):0;const isCorrect=answerRevealed&&i===correctIndex;return`<div class="opt-row${isCorrect?' correct':''}"><div class="opt-letter">${LETTERS[i]}</div><div style="flex:1;min-width:0"><div class="opt-text">${opt}</div>${ansArr.length>0?`<div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`:''}</div>${ansArr.length>0?`<div class="opt-bar-wrap"><div class="opt-count">${n}</div>${answerRevealed?`<div class="opt-pct">${pct}%</div>`:''}</div>`:''}</div>`;}).join('')+'</div>';
     if(answerRevealed&&fact){document.getElementById('fact-box').style.display='block';document.getElementById('fact-text').textContent=fact;}else document.getElementById('fact-box').style.display='none';
     document.getElementById('ans-count').textContent=ansArr.length;
     document.getElementById('ans-total').textContent=playerList.length;
-    document.getElementById('ans-grid').innerHTML=ansArr.map(a=>{const correct=answerRevealed&&a.optionIndex===correctIndex;return`<span class="ans-chip${correct?' correct':''}">${a.name} → ${LETTERS[a.optionIndex]}</span>`}).join('');
+    document.getElementById('ans-grid').innerHTML=ansArr.map(a=>{const correct=answerRevealed&&a.optionIndex===correctIndex;return`<span class="ans-chip${correct?' correct':''}">${a.name} -> ${LETTERS[a.optionIndex]}</span>`;}).join('');
     document.getElementById('reveal-btn').disabled=answerRevealed;
     const isLastQ=question>=totalQuestions-1,isLastR=round>=(totalRounds||3)-1;
     document.getElementById('next-btn').textContent=isLastQ&&isLastR?'Finalas':isLastQ?'Kitas etapas':'Kitas';
@@ -223,57 +225,15 @@ function render(){
   }
   if(phase==='final'){
     document.getElementById('ph-final').classList.add('active');
-    document.getElementById('final-lb').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');
+    document.getElementById('final-lb').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-size:14px;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');
   }
 }
-function showLb(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-lb').classList.add('active');const{players,scores}=state;const playerList=Object.values(players||{});const sorted=[...playerList].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));const medals=['🥇','🥈','🥉'];document.getElementById('lb-content').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');}
-
-// Ekrano budejimas - tik prireikus
-let screenLockSentinel;
-
-async function requestScreenLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      screenLockSentinel = await navigator.wakeLock.request('screen');
-      screenLockSentinel.addEventListener('release', () => {
-        console.log('Screen lock released');
-        requestScreenLock(); // Iš naujo bandyti kai atleidžiama
-      });
-    }
-  } catch (err) {
-    console.error('wakeLock klaida:', err);
-  }
-}
-
-// Pradžioje ir kai grįžta nuo background
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    requestScreenLock();
-  }
-});
-
-// Startinis bandymas
-window.addEventListener('load', () => {
-  requestScreenLock();
-});
-
-// Užimti šiltą audioContext (tik VIENĄ kartą!)
-let audioContextWarmed = false;
-function warmAudioContext() {
-  if (audioContextWarmed) return;
-  audioContextWarmed = true;
-  
-  const audio = document.getElementById('silent-audio');
-  if (audio) {
-    audio.play().catch(() => {
-      // Nepavyko - neproblema, bus šildomas iš naujo kai paspaudžia
-    });
-  }
-}
-
-// Šildyti tik pirmo click'o metu
-document.addEventListener('click', warmAudioContext, { once: true });
-
+function showLb(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-lb').classList.add('active');const{players,scores}=state;const sorted=[...Object.values(players||{})].sort((a,b)=>(scores[b.id]||0)-(scores[a.id]||0));const medals=['🥇','🥈','🥉'];document.getElementById('lb-content').innerHTML=sorted.map((p,i)=>`<div class="lb-row${i===0?' top':''}"><span style="font-size:18px;width:26px">${medals[i]||'#'+(i+1)}</span><span style="flex:1;font-size:14px;font-weight:500">${p.name}</span><span class="lb-pts">${scores[p.id]||0}</span></div>`).join('');}
+async function keepAwake(){try{if("wakeLock" in navigator){await navigator.wakeLock.request("screen");}}catch(e){}}
+keepAwake();
+document.addEventListener("click",function wakeAudio(){const a=document.getElementById("silent-audio");a.play().catch(()=>{});document.removeEventListener("click",wakeAudio);},{once:true});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")keepAwake();
+document.addEventListener("click",function wakeAudio(){const a=document.getElementById("silent-audio");a.play().catch(()=>{});document.removeEventListener("click",wakeAudio);},{once:true});});
 function showQ(){['lobby','question','lb','final'].forEach(p=>document.getElementById('ph-'+p).classList.remove('active'));document.getElementById('ph-question').classList.add('active');}
 </script>
 <audio id="silent-audio" loop><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav"></audio>
