@@ -318,6 +318,13 @@ io.on('connection', (socket) => {
   });
 
   // Zaidejas praše esamo laiko (po reconnect)
+  // Host siuncia savo laika - serveris perduoda visiems zaidejams
+  socket.on('host_tick', ({timeLeft}) => {
+    gameState.lobbyTimeLeft = timeLeft;
+    // Perduoti visiems (iskyrus host)
+    socket.broadcast.emit('lobby_timer', { timeLeft });
+  });
+
   socket.on('get_lobby_time', () => {
     socket.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
   });
