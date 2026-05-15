@@ -302,11 +302,12 @@ function handleState(s){
         setText('reveal-overlay-text', correct?'🎉 Teisingai!':'😔 Neteisingai');
         document.getElementById('reveal-overlay').style.display='block';
       }
+      const revealDuration = (s.settings?.revealDuration||2500);
       setTimeout(()=>{
         document.getElementById('reveal-overlay').style.display='none';
         renderLb(s);
         setScreen('s-lb');
-      }, 2500);
+      }, revealDuration);
       return;
     }
 
@@ -352,14 +353,19 @@ function renderOpts(s, myAns, revealed){
 
 function renderLb(s){
   const players = Object.values(s.players||{});
-  const sorted = Object.entries(s.scores||{}).sort((a,b)=>b[1]-a[1]);
+  const scores = s.scores||{};
+  // Visi zaidejai su taskai (ir 0)
+  const allWithScores = players.map(p=>({
+    id: p.id,
+    name: p.name,
+    pts: scores[p.id]||0
+  })).sort((a,b)=>b.pts-a.pts);
   const medals = ['🥇','🥈','🥉'];
-  document.getElementById('lb-list').innerHTML = sorted.map(([id,pts],i)=>{
-    const p = players.find(x=>x.id===id);
-    return `<div class="lb-row${i===0?' top':''}${id===myId?' me':''}">
+  document.getElementById('lb-list').innerHTML = allWithScores.map((p,i)=>{
+    return `<div class="lb-row${i===0?' top':''}${p.id===myId?' me':''}">
       <span style="font-size:1.1rem;width:24px">${medals[i]||'#'+(i+1)}</span>
-      <span style="flex:1;font-size:.9rem;font-weight:500">${p?.name||'?'}${id===myId?' (tu)':''}</span>
-      <span class="lb-pts">${pts}</span>
+      <span style="flex:1;font-size:.9rem;font-weight:500">${p.name}${p.id===myId?' (tu)':''}</span>
+      <span class="lb-pts">${p.pts}</span>
     </div>`;
   }).join('');
 }
