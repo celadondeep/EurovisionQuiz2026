@@ -36,6 +36,7 @@ let settings = {
   autoReveal: true,
   autoNext: true,
   autoNextDelay: 3,
+  revealDuration: 2500, // ms - kiek laiko rodyti teisinga atsakyma
 };
 
 app.get('/api/settings', (req, res) => res.json(settings));
@@ -46,6 +47,7 @@ app.post('/api/settings', express.json(), (req, res) => {
   if (typeof s.autoReveal === 'boolean') settings.autoReveal = s.autoReveal;
   if (typeof s.autoNext === 'boolean') settings.autoNext = s.autoNext;
   if (typeof s.autoNextDelay === 'number') settings.autoNextDelay = Math.max(1, Math.min(10, s.autoNextDelay));
+  if (typeof s.revealDuration === 'number') settings.revealDuration = Math.max(1000, Math.min(10000, s.revealDuration));
   io.emit('settings', settings);
   res.json({ ok: true, settings });
 });
