@@ -154,9 +154,9 @@ let hostConnected = false;
 function startLobbyTimer() {
   if (gameState.lobbyTimer) clearInterval(gameState.lobbyTimer);
   gameState.lobbyTimer = setInterval(() => {
-    if (!hostConnected) return; // neskaiciuoti jei host neprisijunges
+    if (!hostConnected) return; // laikas tiksi tik kai host prisijunges
     gameState.lobbyTimeLeft--;
-    io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+    io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft }); // siunciame visiems
     if (gameState.lobbyTimeLeft <= 0) {
       clearInterval(gameState.lobbyTimer);
       gameState.lobbyTimer = null;
@@ -329,7 +329,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Lobby timer starts only when host connects;
+// Timer runs always but only counts when host is connected
+startLobbyTimer();;
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
