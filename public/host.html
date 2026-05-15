@@ -111,7 +111,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <div class="lobby-countdown-label">iki pradzios</div>
       </div>
       <div class="lobby-player-count">prisijunge: <span id="stat-p">0</span></div>
-      <audio id="bg-music" loop preload="auto"><source src="/music.mp3" type="audio/mpeg"></audio>
+      <iframe id="yt-player" width="1" height="1" style="position:absolute;opacity:0.01;pointer-events:none;bottom:0;left:0" src="about:blank" allow="autoplay" frameborder="0"></iframe>
     </div>
     <div class="ph" id="ph-question">
       <div class="r-pills" id="r-pills"></div>
@@ -162,18 +162,17 @@ let state={};
 const socket=io({query:{role:'host'}});
 socket.on('state',s=>{state=s;render();});
 
+const YT_SRC="https://www.youtube.com/embed/2N_7XtyJVbA?autoplay=1&start=0&loop=1&playlist=2N_7XtyJVbA&controls=0&mute=0";
 let musicStarted=false;
 function startMusic(){
   if(musicStarted)return;
   musicStarted=true;
-  const audio=document.getElementById('bg-music');
-  audio.volume=0.5;
-  audio.play().catch(()=>{});
+  document.getElementById('yt-player').src=YT_SRC;
   const h=document.getElementById('music-hint');
   if(h)h.textContent='♪ groja';
 }
 document.addEventListener('click',function once(){startMusic();document.removeEventListener('click',once);},{once:true});
-function stopMusic(){document.getElementById("bg-music").pause();musicStarted=false;}
+function stopMusic(){document.getElementById('yt-player').src='about:blank';musicStarted=false;}
 let countdownSeconds=10*60,countdownInterval;
 function startCountdown(){
   countdownInterval=setInterval(()=>{
