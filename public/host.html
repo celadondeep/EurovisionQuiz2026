@@ -125,6 +125,10 @@ html,body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;
         <div class="lobby-countdown" id="countdown">9:30</div>
         <div class="lobby-countdown-lbl">iki pradžios</div>
         <div class="lobby-players">Prisijungę: <span id="lobby-count">0</span></div>
+        <div style="margin-top:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://pcblit.lt&bgcolor=07061a&color=ffffff&qzone=1" style="border-radius:8px;opacity:.85;" alt="QR">
+          <div style="font-family:monospace;font-size:.65rem;letter-spacing:.15em;color:rgba(255,255,255,.25);">pcblit.lt</div>
+        </div>
         <div id="start-btn-wrap" style="margin-top:1.5rem;display:none;">
           <button onclick="socket.emit('host:start');stopMusic();" style="padding:.75rem 2rem;border-radius:50px;border:none;background:#fff;color:#07061a;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.04em;">Pradėti žaidimą →</button>
         </div>
