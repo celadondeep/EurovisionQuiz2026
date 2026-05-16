@@ -28,6 +28,7 @@ app.post('/webhook', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/host', (req, res) => res.sendFile(path.join(__dirname, 'public', 'host.html')));
 app.get('/settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'settings.html')));
+app.get('/promo', (req, res) => res.sendFile(path.join(__dirname, 'public', 'promo.html')));
 
 // ── SETTINGS ──────────────────────────────────────
 let settings = {
