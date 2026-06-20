@@ -42,7 +42,7 @@ header {
     align-items: center;
     text-align: center;
     padding: 100px 20px;
-    isolation: isolate; /* Užtikrina, kad žemiau esantis fonas liks už teksto */
+    isolation: isolate;
 }
 
 /* Hero fono animacija (Letas artejimas) */
@@ -61,11 +61,11 @@ header::before {
 
 @keyframes heroZoom {
     0% { transform: scale(1); }
-    100% { transform: scale(1.15); } /* Prisiartinimas */
+    100% { transform: scale(1.15); }
 }
 
 .hero h1 {
-    font-size: clamp(2rem, 6vw, 4.5rem); /* Skystas dydis */
+    font-size: clamp(2rem, 6vw, 4.5rem);
     margin-bottom: 20px;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -93,16 +93,22 @@ header::before {
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
     box-shadow: 0 4px 15px rgba(217, 0, 0, 0.4);
     position: relative;
     z-index: 2;
+    animation: pulseButton 2.5s infinite; /* Pulsuojantis efektas */
+}
+
+@keyframes pulseButton {
+    0% { box-shadow: 0 4px 15px rgba(217, 0, 0, 0.4), 0 0 0 0 rgba(217, 0, 0, 0.7); }
+    70% { box-shadow: 0 4px 15px rgba(217, 0, 0, 0.4), 0 0 0 20px rgba(217, 0, 0, 0); }
+    100% { box-shadow: 0 4px 15px rgba(217, 0, 0, 0.4), 0 0 0 0 rgba(217, 0, 0, 0); }
 }
 
 .button:hover {
     background: var(--hover-red);
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(217, 0, 0, 0.6);
 }
 
 /* SEKCIJOS */
@@ -115,6 +121,18 @@ h2 {
     margin-bottom: 50px;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
     text-transform: uppercase;
+}
+
+/* SCROLL REVEAL ANIMACIJA */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* PASLAUGOS */
@@ -130,7 +148,7 @@ h2 {
     background: var(--bg-card);
     padding: 35px 30px;
     border-radius: 12px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     border: 1px solid #2a2a2a;
 }
 
@@ -145,6 +163,11 @@ h2 {
     height: 50px;
     color: var(--primary-red);
     margin-bottom: 20px;
+    transition: transform 0.3s ease; /* Ikoneles pasisukimas */
+}
+
+.card:hover .card-icon {
+    transform: scale(1.15) rotate(-5deg); /* Ikoneles pašokinėjimas */
 }
 
 .card-icon svg {
@@ -220,9 +243,9 @@ h2 {
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     border: 1px solid #2a2a2a;
-    cursor: ew-resize; /* Rodyklė, nurodanti tempimą */
-    user-select: none; /* Kad tempant nepasirinktų tekstas */
-    aspect-ratio: 3/2; /* Nuotraukų proporcijos palaikymas */
+    cursor: ew-resize;
+    user-select: none;
+    aspect-ratio: 3/2;
 }
 
 .ba-img {
@@ -233,7 +256,6 @@ h2 {
     pointer-events: none;
 }
 
-/* Po nuotrauka (viršutinė) */
 .ba-after {
     position: absolute;
     top: 0;
@@ -243,7 +265,6 @@ h2 {
     clip-path: inset(0 0 0 50%); 
 }
 
-/* Slankiklio linija ir rankenėlė */
 .ba-handle {
     position: absolute;
     top: 0;
@@ -282,7 +303,6 @@ h2 {
     letter-spacing: -2px;
 }
 
-/* Užrašai PRIEŠ / PO */
 .ba-label {
     position: absolute;
     top: 20px;
@@ -416,6 +436,11 @@ h2 {
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #2a2a2a;
+    transition: transform 0.3s ease;
+}
+
+.about ul li:hover {
+    transform: scale(1.03);
 }
 
 /* KONTAKTAI */
@@ -436,6 +461,11 @@ h2 {
     text-decoration: none;
     display: block;
     margin-bottom: 20px !important;
+    transition: text-shadow 0.3s ease;
+}
+
+.phone:hover {
+    text-shadow: 0 0 15px rgba(217, 0, 0, 0.6);
 }
 
 /* FOOTER */
@@ -451,8 +481,9 @@ footer {
 /* REDUCED MOTION */
 @media (prefers-reduced-motion: reduce) {
     .carshine { display: none; }
-    .card, .bottle, .button { transition: none; }
-    header::before { animation: none; } /* Isjungiam zoom efekta */
+    .card, .bottle, .button, .card-icon, .about ul li, .phone { transition: none; }
+    header::before, .button { animation: none; }
+    .reveal { opacity: 1; transform: none; }
 }
 </style>
 </head>
@@ -468,44 +499,44 @@ footer {
 
 <!-- PASLAUGOS -->
 <section id="paslaugos">
-    <h2>Mūsų paslaugos</h2>
+    <h2 class="reveal">Mūsų paslaugos</h2>
     <div class="services">
-        <div class="card">
+        <div class="card reveal">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M3 16V8a2 2 0 012-2h2l1.5-2h7L18 6h1a2 2 0 012 2v8M6 16h12M6 16v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2M18 16v2a1 1 0 001 1h1a1 1 0 001-1v-2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>
             </div>
             <h3>Cheminis salono valymas</h3>
             <p>Giluminis sėdynių, grindų, lubų ir bagažinės valymas profesionaliomis priemonėmis.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M4 18v-7a4 4 0 014-4h8a4 4 0 014 4v7M4 18h16M4 18v2M20 18v2M7 11h10M7 14h10" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <h3>Odinių salonų valymas</h3>
             <p>Odos valymas, maitinimas ir apsauga, padedanti išlaikyti originalų vaizdą.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M4 8c2-2 4-2 6 0s4 2 6 0 4-2 4-2M4 13c2-2 4-2 6 0s4 2 6 0 4-2 4-2M4 18c2-2 4-2 6 0s4 2 6 0 4-2 4-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <h3>Veliūrinių salonų valymas</h3>
             <p>Dėmių šalinimas ir audinių atgaivinimas naudojant profesionalią įrangą.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M3 21l6-6m0 0l3-9 6 6-9 3zm0 0l3 3M15 3l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <h3>Kėbulo poliravimas</h3>
             <p>Įbrėžimų mažinimas, dažų sluoksnio atnaujinimas ir gilus blizgesys.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3zM9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <h3>Apsauginės dangos</h3>
             <p>Vaškavimas ir ilgalaikės apsauginės nano dangos, saugančios automobilio paviršių.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11c1-1.5 2-1.5 3 0s2 1.5 3 0" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
@@ -517,10 +548,10 @@ footer {
 
 <!-- AUTOMOBILIO SILUETAS -->
 <section class="showcase">
-    <h2>Tobulas blizgesys</h2>
-    <p class="lead">Nuo gilaus salono valymo iki veidrodinio kėbulo poliravimo — kiekviena detalė spindi.</p>
+    <h2 class="reveal">Tobulas blizgesys</h2>
+    <p class="lead reveal">Nuo gilaus salono valymo iki veidrodinio kėbulo poliravimo — kiekviena detalė spindi.</p>
     
-    <svg class="car-svg" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg class="car-svg reveal" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
             <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stop-color="#2a2a2a"/>
@@ -571,26 +602,20 @@ footer {
 
 <!-- GALERIJA PRIEŠ IR PO -->
 <section class="gallery">
-    <h2>Rezultatai: Prieš ir Po</h2>
-    <p class="lead">Patikrinkite mūsų darbo kokybę patys. Tempkite raudoną slankiklį į kairę ar dešinę, kad pamatytumėte skirtumą.</p>
+    <h2 class="reveal">Rezultatai: Prieš ir Po</h2>
+    <p class="lead reveal">Patikrinkite mūsų darbo kokybę patys. Tempkite raudoną slankiklį į kairę ar dešinę, kad pamatytumėte skirtumą.</p>
 
-    <div class="ba-slider" id="baSlider1">
-        <!-- PRIEŠ (apatinė nuotrauka) -->
+    <div class="ba-slider reveal" id="baSlider1">
         <img src="https://images.unsplash.com/photo-1607861716497-e65ab29fc75b?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Automobilis prieš valymą" draggable="false">
         <span class="ba-label before">Prieš</span>
-
-        <!-- PO (viršutinė nuotrauka) -->
         <div class="ba-after">
             <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Automobilis po valymo" draggable="false">
             <span class="ba-label after">Po</span>
         </div>
-
-        <!-- Slankiklis -->
         <div class="ba-handle"></div>
     </div>
 
-    <!-- Antras pavyzdys (pvz., salono valymas) -->
-    <div class="ba-slider" id="baSlider2">
+    <div class="ba-slider reveal" id="baSlider2">
         <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Salonas prieš valymą" draggable="false">
         <span class="ba-label before">Prieš</span>
         
@@ -604,38 +629,38 @@ footer {
 
 <!-- KOCH CHEMIE -->
 <section class="koch">
-    <span class="brand-line">Aukščiausios kokybės chemija</span>
-    <h2>Dirbame su Koch&nbsp;Chemie</h2>
-    <p class="koch-intro">
+    <span class="brand-line reveal">Aukščiausios kokybės chemija</span>
+    <h2 class="reveal">Dirbame su Koch&nbsp;Chemie</h2>
+    <p class="koch-intro reveal">
         Naudojame tik profesionalią <strong>Koch Chemie</strong> chemiją iš Vokietijos — tą pačią, kurią renkasi
         geriausios detailing studijos visame pasaulyje. Taip užtikriname nepriekaištingą rezultatą ir
         visišką saugumą jūsų automobiliui.
     </p>
 
     <div class="bottles">
-        <div class="bottle">
+        <div class="bottle reveal">
             <img src="https://kcxusa.com/cdn/shop/files/Multi_Interior_Cleaner.jpg?v=1745592499&amp;width=800" alt="Koch Chemie Multi Interior Cleaner" loading="lazy" referrerpolicy="no-referrer">
             <h4>Multi Interior Cleaner</h4>
             <span>Salono valymas</span>
         </div>
-        <div class="bottle">
+        <div class="bottle reveal">
             <img src="https://kcxusa.com/cdn/shop/files/Protect_Leather_Care.jpg?v=1745434844&amp;width=800" alt="Koch Chemie Protect Leather Care" loading="lazy" referrerpolicy="no-referrer">
             <h4>Protect Leather Care</h4>
             <span>Odos priežiūra</span>
         </div>
-        <div class="bottle">
+        <div class="bottle reveal">
             <img src="https://kcxusa.com/cdn/shop/files/Shine_speed_polish.jpg?v=1745434844&amp;width=800" alt="Koch Chemie Shine Speed Polish" loading="lazy" referrerpolicy="no-referrer">
             <h4>Shine Speed Polish</h4>
             <span>Kėbulo poliravimas</span>
         </div>
-        <div class="bottle">
+        <div class="bottle reveal">
             <img src="https://kcxusa.com/cdn/shop/files/Protector_Wax.jpg?v=1745435638&amp;width=800" alt="Koch Chemie Protector Wax" loading="lazy" referrerpolicy="no-referrer">
             <h4>Protector Wax</h4>
             <span>Apsauga ir blizgesys</span>
         </div>
     </div>
 
-    <div class="koch-points">
+    <div class="koch-points reveal">
         <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Saugu visiems paviršiams</div>
         <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ilgaamžis rezultatas</div>
         <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Profesionalų pasirinkimas</div>
@@ -645,12 +670,12 @@ footer {
 
 <!-- APIE MUS -->
 <section class="about">
-    <h2>Kodėl verta rinktis mus?</h2>
-    <p>
+    <h2 class="reveal">Kodėl verta rinktis mus?</h2>
+    <p class="reveal">
         Dirbame kruopščiai, naudojame profesionalias priemones ir siekiame,
         kad kiekvienas automobilis atrodytų nepriekaištingai.
     </p>
-    <ul>
+    <ul class="reveal">
         <li>✔ Profesionalios priemonės</li>
         <li>✔ Individualus požiūris</li>
         <li>✔ Aukšta darbų kokybė</li>
@@ -660,16 +685,17 @@ footer {
 
 <!-- KONTAKTAI -->
 <section class="contact" id="kontaktai">
-    <h2>Kontaktai</h2>
-    <a href="tel:+37060000000" class="phone">+370 600 00000</a>
-    <p>El. paštas: <a href="mailto:info@eimaszivila.lt" style="color: #fff; text-decoration: underline;">info@eimaszivila.lt</a></p>
-    <p>Darbo laikas: I–VI 08:00–19:00</p>
+    <h2 class="reveal">Kontaktai</h2>
+    <a href="tel:+37060000000" class="phone reveal">+370 600 00000</a>
+    <p class="reveal">El. paštas: <a href="mailto:info@eimaszivila.lt" style="color: #fff; text-decoration: underline;">info@eimaszivila.lt</a></p>
+    <p class="reveal">Darbo laikas: I–VI 08:00–19:00</p>
 </section>
 
 <footer>
     © 2026 Eimas Živila Auto Detailing. Visos teisės saugomos.
 </footer>
 
+<!-- Prieš ir Po galerijos script'as -->
 <script>
     document.querySelectorAll('.ba-slider').forEach(slider => {
         const handle = slider.querySelector('.ba-handle');
@@ -677,19 +703,13 @@ footer {
         let isDragging = false;
 
         const moveSlider = (x) => {
-            // Apskaičiuojam poziciją procentais
             let rect = slider.getBoundingClientRect();
             let pos = ((x - rect.left) / rect.width) * 100;
-            
-            // Apribojam, kad neišeitų už ribų
             pos = Math.max(0, Math.min(100, pos));
-            
-            // Atnaujinam CSS
             handle.style.left = pos + '%';
             afterImg.style.clipPath = `inset(0 0 0 ${pos}%)`;
         };
 
-        // Pelės įvykiai
         slider.addEventListener('mousedown', (e) => {
             isDragging = true;
             moveSlider(e.clientX);
@@ -701,7 +721,6 @@ footer {
             isDragging = false;
         });
 
-        // Lytėjimo įvykiai (telefonams)
         slider.addEventListener('touchstart', (e) => {
             isDragging = true;
             moveSlider(e.touches[0].clientX);
@@ -712,6 +731,19 @@ footer {
         window.addEventListener('touchend', () => {
             isDragging = false;
         });
+    });
+
+    // Scroll Reveal (Elementų atsiradimas slenkant) script'as
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, { threshold: 0.1 }); // Elementas pasirodo kai 10% jo yra ekrane
+
+    document.querySelectorAll('.reveal').forEach(el => {
+        observer.observe(el);
     });
 </script>
 
