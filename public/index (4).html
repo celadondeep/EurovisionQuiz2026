@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eimas Živila Auto Detailing | Profesionalus automobilių valymas</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+body{
+    background:#111;
+    color:#fff;
+    line-height:1.6;
+}
+header{
+    background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.7)),
+    url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600") center/cover;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+.hero h1{
+    font-size:60px;
+    margin-bottom:20px;
+}
+.hero p{
+    font-size:22px;
+    margin-bottom:30px;
+}
+.button{
+    display:inline-block;
+    padding:15px 35px;
+    background:#d90000;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+    font-size:18px;
+}
+section{
+    padding:80px 10%;
+}
+h2{
+    text-align:center;
+    margin-bottom:50px;
+    font-size:40px;
+}
+.services{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:25px;
+}
+.card{
+    background:#1d1d1d;
+    padding:30px;
+    border-radius:10px;
+    transition:0.3s;
+}
+.card:hover{
+    transform:translateY(-5px);
+}
+.card h3{
+    color:#ff2b2b;
+    margin-bottom:15px;
+}
+.about{
+    background:#181818;
+    text-align:center;
+}
+.contact{
+    text-align:center;
+}
+footer{
+    background:#000;
+    text-align:center;
+    padding:20px;
+    color:#999;
+}
+.phone{
+    color:#ff2b2b;
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* ===== PAPILDYMAI: automobilio elementai ir Koch Chemie ===== */
+
+/* Paslaugų kortelių ikonos */
+.card-icon{
+    width:50px;
+    height:50px;
+    color:#ff2b2b;
+    margin-bottom:18px;
+}
+.card-icon svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.6;fill:none}
+
+/* Automobilio silueto sekcija (rezultatas / blizgesys) */
+.showcase{
+    background:#0d0d0d;
+    text-align:center;
+    padding:70px 10%;
+}
+.showcase p.lead{
+    color:#bbb;
+    font-size:18px;
+    max-width:560px;
+    margin:-30px auto 40px;
+}
+.car-svg{
+    width:100%;
+    max-width:560px;
+    height:auto;
+    margin:0 auto;
+    display:block;
+    overflow:visible;
+}
+.carshine{animation:carShineMove 5.5s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes carShineMove{
+    0%{transform:translateX(-120px);opacity:0}
+    10%{opacity:.9}
+    45%{transform:translateX(640px);opacity:.9}
+    50%,100%{transform:translateX(640px);opacity:0}
+}
+
+/* Koch Chemie sekcija */
+.koch{
+    background:#161616;
+    text-align:center;
+}
+.koch .brand-line{
+    color:#ff2b2b;
+    font-weight:bold;
+    letter-spacing:3px;
+    font-size:14px;
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:14px;
+}
+.koch-intro{
+    max-width:760px;
+    margin:0 auto 55px;
+    color:#cfcfcf;
+    font-size:18px;
+}
+.bottles{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:22px;
+}
+.bottle{
+    background:#1d1d1d;
+    border:1px solid #2a2a2a;
+    border-radius:12px;
+    padding:18px 18px 22px;
+    width:220px;
+    transition:0.3s;
+}
+.bottle:hover{
+    transform:translateY(-6px);
+    border-color:#d90000;
+}
+.bottle img{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:contain;
+    background:#000;
+    border-radius:8px;
+    display:block;
+    margin:0 auto 16px;
+}
+.bottle h4{
+    font-size:16px;
+    color:#fff;
+    margin-bottom:4px;
+}
+.bottle span{
+    display:block;
+    font-size:12px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#ff2b2b;
+}
+.koch-points{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:16px 40px;
+    margin-top:55px;
+}
+.koch-points div{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#ddd;
+    font-size:16px;
+}
+.koch-points svg{width:20px;height:20px;color:#ff2b2b;flex:none}
+
+@media(max-width:600px){
+    .hero h1{font-size:38px}
+    .hero p{font-size:18px}
+    h2{font-size:30px}
+    section{padding:60px 7%}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .carshine{display:none}
+    .card,.bottle{transition:none}
+}
+</style>
+</head>
+<body>
+<header>
+    <div class="hero">
+        <h1>EIMAS ŽIVILA AUTO DETAILING</h1>
+        <p>Profesionalus automobilių valymas ir poliravimas</p>
+        <a href="#kontaktai" class="button">Registruotis</a>
+    </div>
+</header>
+
+<section>
+    <h2>Mūsų paslaugos</h2>
+    <div class="services">
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 16V8a2 2 0 012-2h2l1.5-2h7L18 6h1a2 2 0 012 2v8M6 16h12M6 16v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2M18 16v2a1 1 0 001 1h1a1 1 0 001-1v-2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>
+            </div>
+            <h3>Cheminis salono valymas</h3>
+            <p>Giluminis sėdynių, grindų, lubų ir bagažinės valymas profesionaliomis priemonėmis.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 18v-7a4 4 0 014-4h8a4 4 0 014 4v7M4 18h16M4 18v2M20 18v2M7 11h10M7 14h10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Odinių salonų valymas</h3>
+            <p>Odos valymas, maitinimas ir apsauga, padedanti išlaikyti originalią išvaizdą.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 8c2-2 4-2 6 0s4 2 6 0 4-2 4-2M4 13c2-2 4-2 6 0s4 2 6 0 4-2 4-2M4 18c2-2 4-2 6 0s4 2 6 0 4-2 4-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Veliūrinių salonų valymas</h3>
+            <p>Dėmių šalinimas ir audinių atgaivinimas naudojant profesionalią įrangą.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 21l6-6m0 0l3-9 6 6-9 3zm0 0l3 3M15 3l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Kėbulo poliravimas</h3>
+            <p>Įbrėžimų mažinimas, dažų sluoksnio atnaujinimas ir gilus blizgesys.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3zM9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Apsauginės dangos</h3>
+            <p>Vaškavimas ir ilgalaikės apsauginės dangos, apsaugančios automobilio paviršių.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 9V7h3l1-2h4M5 9H3v3h2m0-3h3l2 2h4a2 2 0 012 2v1h2v3h-2a2 2 0 01-2 2H9l-2-2H5v-2H3v-3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="12.5" r="2"/></svg>
+            </div>
+            <h3>Variklio skyriaus valymas</h3>
+            <p>Saugus ir kruopštus variklio skyriaus valymas bei estetinės išvaizdos atkūrimas.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Automobilio elementas: poliruotas siluetas su blizgesiu -->
+<section class="showcase">
+    <h2>Tobulas blizgesys</h2>
+    <p class="lead">Nuo gilaus salono valymo iki veidrodinio kėbulo poliravimo — kiekviena detalė spindi.</p>
+    <svg class="car-svg" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2a2a2a"/>
+                <stop offset="0.55" stop-color="#161616"/>
+                <stop offset="1" stop-color="#0a0a0a"/>
+            </linearGradient>
+            <linearGradient id="carShineGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.75"/>
+                <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="carClip">
+                <path d="M40 168 L42 146 C46 122 64 112 100 108 L182 105 C200 104 208 98 222 84 C238 64 272 52 314 50 L388 50 C426 51 448 66 470 92 C480 104 498 108 532 112 C560 115 568 130 568 150 L566 168 L486 168 C474 134 430 134 418 168 L182 168 C170 134 126 134 114 168 L40 168 Z"/>
+            </clipPath>
+        </defs>
+
+        <!-- raudonas atspindys po automobiliu -->
+        <ellipse cx="304" cy="206" rx="250" ry="13" fill="#d90000" opacity="0.16"/>
+        <ellipse cx="304" cy="208" rx="210" ry="9" fill="#000" opacity="0.5"/>
+
+        <!-- kėbulas -->
+        <path d="M40 168 L42 146 C46 122 64 112 100 108 L182 105 C200 104 208 98 222 84 C238 64 272 52 314 50 L388 50 C426 51 448 66 470 92 C480 104 498 108 532 112 C560 115 568 130 568 150 L566 168 L486 168 C474 134 430 134 418 168 L182 168 C170 134 126 134 114 168 L40 168 Z" fill="url(#carBody)" stroke="#000" stroke-width="1"/>
+
+        <!-- stiklai -->
+        <path d="M236 86 C250 66 280 56 314 54 L386 54 C418 56 438 70 456 90 L252 90 C244 90 240 89 236 86 Z" fill="#0a0d12" opacity="0.9"/>
+        <line x1="352" y1="55" x2="352" y2="90" stroke="#000" stroke-width="3"/>
+        <!-- charakterio linija (raudona) -->
+        <path d="M70 132 C200 124 380 124 540 134" stroke="#d90000" stroke-width="1.5" opacity="0.3" fill="none"/>
+        <!-- žibintai -->
+        <path d="M44 150 q-3 1 -2 8 l9 -2 q1 -6 -7 -6 z" fill="#fff" opacity="0.85"/>
+        <rect x="556" y="146" width="9" height="11" rx="2" fill="#d90000"/>
+
+        <!-- blizgesio brūkšnys -->
+        <g clip-path="url(#carClip)">
+            <g transform="skewX(-16)">
+                <rect class="carshine" x="-60" y="-20" width="80" height="270" fill="url(#carShineGrad)"/>
+            </g>
+        </g>
+
+        <!-- ratai -->
+        <g>
+            <circle cx="148" cy="168" r="33" fill="#121212"/>
+            <circle cx="148" cy="168" r="22" fill="#1b1b1b" stroke="#333" stroke-width="1"/>
+            <circle cx="148" cy="168" r="22" fill="none" stroke="#ff2b2b" stroke-width="2" opacity="0.85"/>
+            <circle cx="148" cy="168" r="5" fill="#ff2b2b"/>
+        </g>
+        <g>
+            <circle cx="452" cy="168" r="33" fill="#121212"/>
+            <circle cx="452" cy="168" r="22" fill="#1b1b1b" stroke="#333" stroke-width="1"/>
+            <circle cx="452" cy="168" r="22" fill="none" stroke="#ff2b2b" stroke-width="2" opacity="0.85"/>
+            <circle cx="452" cy="168" r="5" fill="#ff2b2b"/>
+        </g>
+    </svg>
+</section>
+
+<!-- Koch Chemie: aukščiausios kokybės chemija + tikros produktų nuotraukos -->
+<section class="koch">
+    <span class="brand-line">Aukščiausios kokybės chemija</span>
+    <h2>Dirbame su Koch&nbsp;Chemie</h2>
+    <p class="koch-intro">
+        Naudojame tik profesionalią <strong>Koch Chemie</strong> chemiją iš Vokietijos — tą pačią, kurią renkasi
+        geriausios detailing studijos visame pasaulyje. Taip užtikriname nepriekaištingą rezultatą ir
+        visišką saugumą jūsų automobiliui.
+    </p>
+
+    <div class="bottles">
+        <div class="bottle">
+            <img src="https://kcxusa.com/cdn/shop/files/Multi_Interior_Cleaner.jpg?v=1745592499&amp;width=800" alt="Koch Chemie Multi Interior Cleaner" loading="lazy" referrerpolicy="no-referrer">
+            <h4>Multi Interior Cleaner</h4>
+            <span>Salono valymas</span>
+        </div>
+        <div class="bottle">
+            <img src="https://kcxusa.com/cdn/shop/files/Protect_Leather_Care.jpg?v=1745434844&amp;width=800" alt="Koch Chemie Protect Leather Care" loading="lazy" referrerpolicy="no-referrer">
+            <h4>Protect Leather Care</h4>
+            <span>Odos priežiūra</span>
+        </div>
+        <div class="bottle">
+            <img src="https://kcxusa.com/cdn/shop/files/Shine_speed_polish.jpg?v=1745434844&amp;width=800" alt="Koch Chemie Shine Speed Polish" loading="lazy" referrerpolicy="no-referrer">
+            <h4>Shine Speed Polish</h4>
+            <span>Kėbulo poliravimas</span>
+        </div>
+        <div class="bottle">
+            <img src="https://kcxusa.com/cdn/shop/files/Protector_Wax.jpg?v=1745435638&amp;width=800" alt="Koch Chemie Protector Wax" loading="lazy" referrerpolicy="no-referrer">
+            <h4>Protector Wax</h4>
+            <span>Apsauga ir blizgesys</span>
+        </div>
+    </div>
+
+    <div class="koch-points">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Saugu visiems paviršiams</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ilgaamžis rezultatas</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Profesionalų pasirinkimas</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Vokiška kokybė</div>
+    </div>
+</section>
+
+<section class="about">
+    <h2>Kodėl verta rinktis mus?</h2>
+    <p>
+        Dirbame kruopščiai, naudojame profesionalias priemones ir siekiame,
+        kad kiekvienas automobilis atrodytų nepriekaištingai.
+    </p>
+    <br>
+    <p>
+        ✔ Profesionalios priemonės<br>
+        ✔ Individualus požiūris<br>
+        ✔ Aukšta darbų kokybė<br>
+        ✔ Konkurencingos kainos
+    </p>
+</section>
+
+<section class="contact" id="kontaktai">
+    <h2>Kontaktai</h2>
+    <p class="phone">+370 600 00000</p>
+    <br>
+    <p>El. paštas: info@eimaszivila.lt</p>
+    <p>Darbo laikas: I–VI 08:00–19:00</p>
+</section>
+
+<footer>
+    © 2026 Eimas Živila Auto Detailing. Visos teisės saugomos.
+</footer>
+</body>
+</html>
