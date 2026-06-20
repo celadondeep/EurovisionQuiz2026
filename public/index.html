@@ -173,6 +173,107 @@ h2 {
     50%, 100% { transform: translateX(640px); opacity: 0; }
 }
 
+/* GALERIJA (Prieš ir Po) */
+.gallery {
+    background: var(--bg-dark);
+    text-align: center;
+}
+
+.gallery p.lead {
+    color: #bbb;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    max-width: 600px;
+    margin: -20px auto 50px;
+}
+
+.ba-slider {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto 40px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #2a2a2a;
+    cursor: ew-resize; /* Rodyklė, nurodanti tempimą */
+    user-select: none; /* Kad tempant nepasirinktų tekstas */
+    aspect-ratio: 3/2; /* Nuotraukų proporcijos palaikymas */
+}
+
+.ba-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+/* Po nuotrauka (viršutinė) */
+.ba-after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: inset(0 0 0 50%); 
+}
+
+/* Slankiklio linija ir rankenėlė */
+.ba-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: var(--primary-red);
+    transform: translateX(-50%);
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(217, 0, 0, 0.6);
+}
+
+.ba-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    background: var(--primary-red);
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.ba-handle::before {
+    content: '⟨ ⟩';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 11;
+    letter-spacing: -2px;
+}
+
+/* Užrašai PRIEŠ / PO */
+.ba-label {
+    position: absolute;
+    top: 20px;
+    padding: 5px 15px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 20px;
+    z-index: 5;
+}
+
+.ba-label.before { left: 20px; }
+.ba-label.after { right: 20px; }
+
 /* KOCH CHEMIE */
 .koch {
     background: var(--bg-section);
@@ -375,7 +476,14 @@ footer {
                 <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3zM9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <h3>Apsauginės dangos</h3>
-            <p>Vaškavimas ir ilgalaikės apsauginės dangos, saugančios automobilio paviršių.</p>
+            <p>Vaškavimas ir ilgalaikės apsauginės nano dangos, saugančios automobilio paviršių.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11c1-1.5 2-1.5 3 0s2 1.5 3 0" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Keraminės dangos</h3>
+            <p>Ilgalaikė apsauga nuo purvo, vandens ir UV spindulių, suteikianti nepakartojamą kėbulo blizgesį.</p>
         </div>
     </div>
 </section>
@@ -432,6 +540,39 @@ footer {
             <circle cx="452" cy="168" r="5" fill="#ff2b2b"/>
         </g>
     </svg>
+</section>
+
+<!-- GALERIJA PRIEŠ IR PO -->
+<section class="gallery">
+    <h2>Rezultatai: Prieš ir Po</h2>
+    <p class="lead">Patikrinkite mūsų darbo kokybę patys. Tempkite raudoną slankiklį į kairę ar dešinę, kad pamatytumėte skirtumą.</p>
+
+    <div class="ba-slider" id="baSlider1">
+        <!-- PRIEŠ (apatinė nuotrauka) -->
+        <img src="https://images.unsplash.com/photo-1607861716497-e65ab29fc75b?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Automobilis prieš valymą" draggable="false">
+        <span class="ba-label before">Prieš</span>
+
+        <!-- PO (viršutinė nuotrauka) -->
+        <div class="ba-after">
+            <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Automobilis po valymo" draggable="false">
+            <span class="ba-label after">Po</span>
+        </div>
+
+        <!-- Slankiklis -->
+        <div class="ba-handle"></div>
+    </div>
+
+    <!-- Antras pavyzdys (pvz., salono valymas) -->
+    <div class="ba-slider" id="baSlider2">
+        <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Salonas prieš valymą" draggable="false">
+        <span class="ba-label before">Prieš</span>
+        
+        <div class="ba-after">
+            <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=1200&auto=format&fit=crop" class="ba-img" alt="Salonas po valymo" draggable="false">
+            <span class="ba-label after">Po</span>
+        </div>
+        <div class="ba-handle"></div>
+    </div>
 </section>
 
 <!-- KOCH CHEMIE -->
@@ -501,6 +642,51 @@ footer {
 <footer>
     © 2026 Eimas Živila Auto Detailing. Visos teisės saugomos.
 </footer>
+
+<script>
+    document.querySelectorAll('.ba-slider').forEach(slider => {
+        const handle = slider.querySelector('.ba-handle');
+        const afterImg = slider.querySelector('.ba-after');
+        let isDragging = false;
+
+        const moveSlider = (x) => {
+            // Apskaičiuojam poziciją procentais
+            let rect = slider.getBoundingClientRect();
+            let pos = ((x - rect.left) / rect.width) * 100;
+            
+            // Apribojam, kad neišeitų už ribų
+            pos = Math.max(0, Math.min(100, pos));
+            
+            // Atnaujinam CSS
+            handle.style.left = pos + '%';
+            afterImg.style.clipPath = `inset(0 0 0 ${pos}%)`;
+        };
+
+        // Pelės įvykiai
+        slider.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            moveSlider(e.clientX);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) moveSlider(e.clientX);
+        });
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Lytėjimo įvykiai (telefonams)
+        slider.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            moveSlider(e.touches[0].clientX);
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) moveSlider(e.touches[0].clientX);
+        }, { passive: true });
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    });
+</script>
 
 </body>
 </html>
