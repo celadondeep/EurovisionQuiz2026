@@ -1,307 +1,362 @@
-// Eimas Živila Auto Detailing — backend BE JOKIŲ išorinių paketų (npm install nereikalingas).
-// Naudoja tik integruotus Node.js modulius: http, fs, path, crypto, url.
-// Duomenys: data/content.json. Nuotraukos: uploads/.
-
+const express = require('express');
 const http = require('http');
-const fs = require('fs');
+const { Server } = require('socket.io');
 const path = require('path');
-const crypto = require('crypto');
 const { exec } = require('child_process');
-const { URL } = require('url');
+const crypto = require('crypto');
 
-const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'pakeisk-slaptazodi';
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
-// GitHub webhook auto-deploy (palikta suderinama su senu setup'u)
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'eurovizija2026';
-const DEPLOY_DIR = process.env.DEPLOY_DIR || '/var/www/eurovizija';
-const DEPLOY_SERVICE = process.env.DEPLOY_SERVICE || 'eurovizija';
+const WEBHOOK_SECRET = 'eurovizija2026';
 
-const ROOT = __dirname;
-const DATA_FILE = path.join(ROOT, 'data', 'content.json');
-const UPLOAD_DIR = path.join(ROOT, 'uploads');
-const PUBLIC_DIR = path.join(ROOT, 'public');
+app.use('/webhook', express.json({
+  verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); }
+}));
+app.post('/webhook', (req, res) => {
+  const sig = req.headers['x-hub-signature-256'];
+  const hmac = 'sha256=' + crypto.createHmac('sha256', WEBHOOK_SECRET).update(req.rawBody || '').digest('hex');
+  if (!sig || sig !== hmac) return res.status(403).send('Forbidden');
+  res.status(200).send('OK');
+  exec('cd /var/www/eurovizija && git pull origin main && systemctl restart eurovizija', (err, stdout) => {
+    if (err) console.error('Webhook klaida:', err);
+    else console.log('Auto-update:', stdout);
+  });
+});
 
-for (const dir of [path.dirname(DATA_FILE), UPLOAD_DIR, PUBLIC_DIR]) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/host', (req, res) => res.sendFile(path.join(__dirname, 'public', 'host.html')));
+app.get('/settings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'settings.html')));
+app.get('/promo', (req, res) => res.sendFile(path.join(__dirname, 'public', 'promo.html')));
 
-// ---------- Pradiniai duomenys ----------
-const DEFAULT_DATA = {
-  contact: {
-    phone: '+37066317114',
-    phoneDisplay: '+370 663 17114',
-    email: 'eimas.ziv@gmail.com',
-    hours: 'Individualiai pagal susitarimą'
+// ── SETTINGS ──────────────────────────────────────
+let settings = {
+  lobbySeconds: 9 * 60 + 30,
+  questionSeconds: 15,
+  autoReveal: true,
+  autoNext: true,
+  autoNextDelay: 3,
+  revealDuration: 2500, // ms - kiek laiko rodyti teisinga atsakyma
+};
+
+app.get('/api/settings', (req, res) => res.json(settings));
+app.post('/api/settings', express.json(), (req, res) => {
+  const s = req.body;
+  if (typeof s.lobbySeconds === 'number') settings.lobbySeconds = Math.max(30, Math.min(3600, s.lobbySeconds));
+  if (typeof s.questionSeconds === 'number') settings.questionSeconds = Math.max(5, Math.min(120, s.questionSeconds));
+  if (typeof s.autoReveal === 'boolean') settings.autoReveal = s.autoReveal;
+  if (typeof s.autoNext === 'boolean') settings.autoNext = s.autoNext;
+  if (typeof s.autoNextDelay === 'number') settings.autoNextDelay = Math.max(1, Math.min(10, s.autoNextDelay));
+  if (typeof s.revealDuration === 'number') settings.revealDuration = Math.max(1000, Math.min(10000, s.revealDuration));
+  io.emit('settings', settings);
+  res.json({ ok: true, settings });
+});
+
+// ── ROUNDS ────────────────────────────────────────
+const ROUNDS = [
+  {
+    name: "1 etapas: Istorija",
+    questions: [
+      { q: "Kiek kartų Švedija laimėjo Euroviziją?", opts: ["3 kartus", "5 kartus", "7 kartus", "9 kartus"], correct: 2, fact: "Švedija laimėjo 1974, 1984, 1991, 1999, 2012, 2015 ir 2023 m. – daugiausia istorijoje!" },
+      { q: "Ar Sovietų Sąjunga kada nors dalyvavo Eurovizijoje?", opts: ["Taip", "Ne"], correct: 1, fact: "SSRS niekada nedalyvavo – konkursas buvo laikomas Vakarų propaganda. Rusija debiutavo tik 1994 m." },
+      { q: "Kuri šalis laimėjo pirmąją Euroviziją 1956 m.?", opts: ["Prancūzija", "Italija", "Vokietija", "Šveicarija"], correct: 3, fact: "Šveicarija laimėjo su Lys Assia ir daina 'Refrain' pirmajame konkurse Lugane." },
+      { q: "Kokia aukščiausia vieta, kurią Lietuva užėmė Eurovizijoje?", opts: ["2 vieta", "4 vieta", "6 vieta", "10 vieta"], correct: 2, fact: "LT United 2006 m. su 'We Are The Winners' – 6 vieta. The Roop 2021 m. užėmė 8 vietą." },
+      { q: "Kuri dingusi valstybė laimėjo Euroviziją 1989 m.?", opts: ["Čekoslovakija", "Rytų Vokietija", "Jugoslavija", "Sovietų Sąjunga"], correct: 2, fact: "Jugoslavija laimėjo su Riva ir 'Rock Me'. Vos po dvejų metų šalis žlugo." },
+      { q: "Kiek kartų Airija laimėjo Euroviziją?", opts: ["3 kartus", "5 kartus", "7 kartus", "11 kartų"], correct: 2, fact: "Airija laimėjo 7 kartus! 1992–1994 m. laimėjo tris kartus iš eilės." },
+    ]
   },
-  gallery: [],
-  reviews: [
-    { id: '1', name: 'Tomas', car: 'VW Passat', stars: 5, text: 'Salonas po cheminio valymo atrodo kaip naujas.' },
-    { id: '2', name: 'Ieva', car: 'Toyota RAV4', stars: 5, text: 'Labai kruopštus darbas ir malonus bendravimas.' },
-    { id: '3', name: 'Mantas', car: 'BMW 530', stars: 5, text: 'Po poliravimo ir keraminės dangos kėbulas atrodo geriau nei perkant.' },
-    { id: '4', name: 'Dalius', car: 'BMW 520', stars: 5, text: 'Automobilis atrodo nepriekaištingai — kėbulas blizga, salonas švarus kaip iš salono.' }
-  ]
+  {
+    name: "2 etapas: Lietuva",
+    questions: [
+      { q: "Kiek kartų Aistė Pilvelytė dalyvavo nacionalinėje atrankoje?", opts: ["4 kartus", "7 kartus", "11 kartų", "15 kartų"], correct: 2, fact: "11 kartų! Aistė Pilvelytė tapo savotišku lietuviško Eurovizijos humoro simboliu." },
+      { q: "Kuriais metais Lietuva debiutavo Eurovizijoje?", opts: ["1990 m.", "1992 m.", "1994 m.", "1998 m."], correct: 2, fact: "Lietuva pirmą kartą dalyvavo 1994 m. Dublino konkurse." },
+      { q: "Ar Lietuva kada nors surengė Euroviziją?", opts: ["Taip", "Ne"], correct: 1, fact: "Ne – Lietuva dar nėra laimėjusi Eurovizijos, todėl ir niekada jos nerengė." },
+      { q: "Kas atstovavo Lietuvai 2021 m. Eurovizijoje?", opts: ["Fusedmarc", "The Roop", "Monika Liu", "Jurij Veklenko"], correct: 1, fact: "The Roop su 'Discoteque' užėmė puikią 8 vietą Roterdame." },
+      { q: "Kaip vadinosi grupė, kuri Lietuvai atnešė 6 vietą 2006 m.?", opts: ["Skamp", "InCulto", "LT United", "Donny Montell"], correct: 2, fact: "'We Are The Winners' – tai turbūt žinomiausias Lietuvos Eurovizijos momentas." },
+    ]
+  },
+  {
+    name: "3 etapas: ABBA ir faktai",
+    questions: [
+      { q: "Kuriais metais ABBA laimėjo Euroviziją?", opts: ["1970 m.", "1974 m.", "1978 m.", "1982 m."], correct: 1, fact: "ABBA laimėjo 1974 m. Braitone su 'Waterloo'." },
+      { q: "Kokioje šalyje ABBA atstovavo Eurovizijoje?", opts: ["Norvegijoje", "Danijoje", "Suomijoje", "Švedijoje"], correct: 3, fact: "ABBA atstovavo Švedijai – tai viena iš priežasčių, kodėl Švedija asocijuojasi su Eurovizija." },
+      { q: "Kiek taškų yra didžiausias balas Eurovizijoje?", opts: ["8 taškai", "10 taškų", "12 taškų", "15 taškų"], correct: 2, fact: "'Douze points!' – 12 taškų yra didžiausias balas. Šis šauksmas tapo Eurovizijos simboliu." },
+      { q: "Kuriais metais Ukraina pirmą kartą laimėjo Euroviziją?", opts: ["2000 m.", "2004 m.", "2008 m.", "2012 m."], correct: 1, fact: "Ruslana su 'Wild Dances' 2004 m. Stambule. Ukraina laimėjo dar 2016 ir 2022 m." },
+      { q: "Kurioje šalyje pirmą kartą vyko Eurovizija?", opts: ["Prancūzijoje", "Vokietijoje", "Italijoje", "Šveicarijoje"], correct: 3, fact: "1956 m. Lugane, Šveicarijoje. EBU sukūrė konkursą suvienyti pokario Europą per televiziją." },
+      { q: "Kuri šalis daugiausiai kartų gavo 0 taškų?", opts: ["Austrija", "Norvegija", "Prancūzija", "Vokietija"], correct: 1, fact: "Norvegija gavo 0 taškų net 4 kartus – daugiau nei bet kuri kita šalis!" },
+    ]
+  }
+];
+
+// ── GAME STATE ────────────────────────────────────
+let gameState = {
+  phase: 'lobby',
+  players: {},
+  round: 0,
+  question: 0,
+  answerRevealed: false,
+  answers: {},
+  scores: {},
+  questionTimer: null,
+  timeLeft: 15,
+  lobbyTimeLeft: 9 * 60 + 30,
+  lobbyTimer: null,
+  cheaters: {},
 };
 
-function loadData() {
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, JSON.stringify(DEFAULT_DATA, null, 2));
-  try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-  } catch {
-    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+function resetGame() {
+  if (gameState.questionTimer) clearInterval(gameState.questionTimer);
+  if (gameState.lobbyTimer) clearInterval(gameState.lobbyTimer);
+  gameState = {
+    phase: 'lobby', players: {}, round: 0, question: 0,
+    answerRevealed: false, answers: {}, scores: {},
+    questionTimer: null, timeLeft: settings.questionSeconds,
+    lobbyTimeLeft: settings.lobbySeconds, lobbyTimer: null,
+    cheaters: {},
+  };
+  // Jei host jau prisijunges - is karto pradeti laikmati
+  if (hostConnected) {
+    startLobbyTimer();
+    io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
   }
 }
-function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+
+function currentQ() {
+  return ROUNDS[gameState.round]?.questions[gameState.question] || null;
 }
 
-// ---------- Pagalbinės funkcijos ----------
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-  '.png': 'image/png', '.gif': 'image/gif',
-  '.webp': 'image/webp', '.svg': 'image/svg+xml'
-};
-
-const EXT_FROM_MIME = {
-  'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif',
-  'image/webp': '.webp', 'image/svg+xml': '.svg'
-};
-
-function sendJson(res, status, obj) {
-  const body = JSON.stringify(obj);
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) });
-  res.end(body);
+function getPublicState() {
+  const q = currentQ();
+  return {
+    phase: gameState.phase,
+    round: gameState.round,
+    roundName: ROUNDS[gameState.round]?.name || '',
+    question: gameState.question,
+    totalQuestions: ROUNDS[gameState.round]?.questions.length || 0,
+    totalRounds: ROUNDS.length,
+    questionText: q?.q || '',
+    options: q?.opts || [],
+    optionCount: q?.opts?.length || 4,
+    correctIndex: gameState.answerRevealed ? q?.correct : null,
+    fact: gameState.answerRevealed ? (q?.fact || '') : null,
+    answerRevealed: gameState.answerRevealed,
+    players: gameState.players,
+    scores: gameState.scores,
+    answers: gameState.answers,
+    timeLeft: gameState.timeLeft,
+    lobbyTimeLeft: gameState.lobbyTimeLeft,
+    cheaters: gameState.cheaters,
+    settings: settings,
+  };
 }
 
-function sendFile(res, filePath) {
-  fs.readFile(filePath, (err, data) => {
-    if (err) { sendJson(res, 404, { error: 'Nerasta' }); return; }
-    const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Content-Length': data.length });
-    res.end(data);
+// ── LOBBY TIMER ───────────────────────────────────
+let hostConnected = false;
+
+function startLobbyTimer() {
+  if (gameState.lobbyTimer) clearInterval(gameState.lobbyTimer);
+  gameState.lobbyTimer = setInterval(() => {
+    if (!hostConnected) return; // laikas tiksi tik kai host prisijunges
+    gameState.lobbyTimeLeft--;
+    io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft }); // siunciame visiems
+    if (gameState.lobbyTimeLeft <= 0) {
+      clearInterval(gameState.lobbyTimer);
+      gameState.lobbyTimer = null;
+    }
+  }, 1000);
+}
+
+function startGame() {
+  gameState.phase = 'question';
+  gameState.round = 0;
+  gameState.question = 0;
+  gameState.answerRevealed = false;
+  gameState.answers = {};
+  startQuestionTimer();
+  io.emit('state', getPublicState());
+}
+
+// ── QUESTION TIMER ────────────────────────────────
+function startQuestionTimer() {
+  if (gameState.questionTimer) clearInterval(gameState.questionTimer);
+  gameState.timeLeft = settings.questionSeconds;
+  gameState.questionTimer = setInterval(() => {
+    gameState.timeLeft--;
+    io.emit('timer', { timeLeft: gameState.timeLeft });
+    if (gameState.timeLeft <= 0) {
+      clearInterval(gameState.questionTimer);
+      gameState.questionTimer = null;
+      if (!gameState.answerRevealed && settings.autoReveal) {
+        revealAnswer();
+        if (settings.autoNext) {
+          setTimeout(() => nextQuestion(), settings.autoNextDelay * 1000);
+        }
+      }
+    }
+  }, 1000);
+}
+
+function revealAnswer() {
+  if (gameState.answerRevealed) return;
+  gameState.answerRevealed = true;
+  const q = currentQ();
+  Object.entries(gameState.answers).forEach(([pid, data]) => {
+    if (data.optionIndex === q.correct) {
+      gameState.scores[pid] = (gameState.scores[pid] || 0) + 1;
+    }
   });
+  io.emit('state', getPublicState());
 }
 
-function collectBody(req, limitBytes) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    let size = 0;
-    req.on('data', (chunk) => {
-      size += chunk.length;
-      if (size > limitBytes) { reject(new Error('Failas per didelis')); req.destroy(); return; }
-      chunks.push(chunk);
-    });
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
-}
-
-async function parseJsonBody(req) {
-  const buf = await collectBody(req, 2 * 1024 * 1024);
-  if (!buf.length) return {};
-  try { return JSON.parse(buf.toString('utf-8')); } catch { return {}; }
-}
-
-// Paprastas multipart/form-data skaitytuvas (be jokių paketų)
-function parseMultipart(buffer, boundary) {
-  const boundaryBytes = Buffer.from(`--${boundary}`);
-  const parts = [];
-  let pos = buffer.indexOf(boundaryBytes);
-  if (pos === -1) return parts;
-  pos += boundaryBytes.length;
-  while (true) {
-    if (buffer.slice(pos, pos + 2).toString('utf-8') === '--') break; // pasiektas pabaigos žymeklis
-    if (buffer.slice(pos, pos + 2).toString('utf-8') === '\r\n') pos += 2;
-    const nextBoundaryPos = buffer.indexOf(boundaryBytes, pos);
-    if (nextBoundaryPos === -1) break;
-    const partEnd = nextBoundaryPos - 2; // pašalinam \r\n prieš kitą boundary
-    const rawPart = buffer.slice(pos, partEnd);
-    const headerEndIdx = rawPart.indexOf('\r\n\r\n');
-    if (headerEndIdx === -1) { pos = nextBoundaryPos + boundaryBytes.length; continue; }
-    const headerStr = rawPart.slice(0, headerEndIdx).toString('utf-8');
-    const body = rawPart.slice(headerEndIdx + 4);
-    const nameMatch = headerStr.match(/name="([^"]+)"/);
-    const filenameMatch = headerStr.match(/filename="([^"]*)"/);
-    const ctMatch = headerStr.match(/Content-Type:\s*([^\r\n]+)/i);
-    parts.push({
-      name: nameMatch ? nameMatch[1] : null,
-      filename: filenameMatch ? filenameMatch[1] : null,
-      contentType: ctMatch ? ctMatch[1].trim() : null,
-      data: body
-    });
-    pos = nextBoundaryPos + boundaryBytes.length;
+function nextQuestion() {
+  const round = ROUNDS[gameState.round];
+  gameState.answerRevealed = false;
+  gameState.answers = {};
+  if (gameState.question < round.questions.length - 1) {
+    gameState.question++;
+  } else if (gameState.round < ROUNDS.length - 1) {
+    gameState.round++;
+    gameState.question = 0;
+  } else {
+    gameState.phase = 'final';
+    io.emit('state', getPublicState());
+    return;
   }
-  return parts;
+  startQuestionTimer();
+  io.emit('state', getPublicState());
 }
 
-async function parseMultipartRequest(req, limitBytes) {
-  const ct = req.headers['content-type'] || '';
-  const boundaryMatch = ct.match(/boundary=(?:"([^"]+)"|([^;]+))/);
-  if (!boundaryMatch) throw new Error('Nerastas multipart boundary');
-  const boundary = boundaryMatch[1] || boundaryMatch[2];
-  const buf = await collectBody(req, limitBytes);
-  return parseMultipart(buf, boundary);
-}
+// ── SOCKET.IO ─────────────────────────────────────
+io.on('connection', (socket) => {
+  const isHost = socket.handshake.query.role === 'host';
+  
+  // Siusti esama laika visiems iš karto kai prisijungia (dar pries varda)
+  if (gameState.phase === 'lobby') {
+    socket.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+  }
 
-function isAdmin(req) {
-  return req.headers['x-admin-password'] === ADMIN_PASSWORD;
-}
-
-function saveUploadedImage(part, prefix) {
-  const ext = EXT_FROM_MIME[part.contentType] || path.extname(part.filename || '') || '.jpg';
-  const filename = `${prefix}-${crypto.randomBytes(6).toString('hex')}${ext}`;
-  fs.writeFileSync(path.join(UPLOAD_DIR, filename), part.data);
-  return `/uploads/${filename}`;
-}
-
-// ---------- Serveris ----------
-const server = http.createServer(async (req, res) => {
-  try {
-    const u = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-    const pathname = decodeURIComponent(u.pathname);
-    const method = req.method;
-
-    // ---- Statiniai failai ----
-    if (method === 'GET' && pathname === '/') return sendFile(res, path.join(PUBLIC_DIR, 'index.html'));
-    if (method === 'GET' && pathname === '/admin.html') return sendFile(res, path.join(PUBLIC_DIR, 'admin.html'));
-    if (method === 'GET' && pathname.startsWith('/uploads/')) {
-      const safe = path.normalize(pathname.replace('/uploads/', '')).replace(/^(\.\.[/\\])+/, '');
-      return sendFile(res, path.join(UPLOAD_DIR, safe));
+  if (isHost) {
+    socket.join('host');
+    socket.emit('state', getPublicState());
+    socket.emit('settings', settings);
+    // Pradeti laikmati tik kai host prisijungia
+    if (gameState.phase === 'lobby') {
+      hostConnected = true;
+      if (!gameState.lobbyTimer) {
+        gameState.lobbyTimeLeft = settings.lobbySeconds;
+        startLobbyTimer();
+      }
+      // Siusti esamą laiką visiems žaidėjams
+      io.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
     }
-    if (method === 'GET' && !pathname.startsWith('/api/')) {
-      const safe = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
-      const candidate = path.join(PUBLIC_DIR, safe);
-      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return sendFile(res, candidate);
-    }
+  }
 
-    // ---- GitHub webhook: automatinis atnaujinimas po push ----
-    if (method === 'POST' && pathname === '/webhook') {
-      const raw = await collectBody(req, 5 * 1024 * 1024);
-      const sig = req.headers['x-hub-signature-256'];
-      const hmac = 'sha256=' + crypto.createHmac('sha256', WEBHOOK_SECRET).update(raw).digest('hex');
-      const sigBuf = Buffer.from(sig || '');
-      const hmacBuf = Buffer.from(hmac);
-      const valid = sig && sigBuf.length === hmacBuf.length && crypto.timingSafeEqual(sigBuf, hmacBuf);
-      if (!valid) { res.writeHead(403); return res.end('Forbidden'); }
-      res.writeHead(200); res.end('OK');
-      exec(`cd ${DEPLOY_DIR} && git pull origin main && systemctl restart ${DEPLOY_SERVICE}`, (err, stdout, stderr) => {
-        if (err) console.error('Webhook klaida:', err.message, stderr);
-        else console.log('Auto-update:', stdout);
-      });
+  socket.on('join', ({ name }) => {
+    const trimmed = name.trim().slice(0, 20);
+    if (!trimmed) return;
+
+    // Patikrinti ar vardas jau uzimtas
+    const nameTaken = Object.values(gameState.players).some(p => p.name.toLowerCase() === trimmed.toLowerCase());
+    if (nameTaken) {
+      socket.emit('join_error', { message: 'Toks vardas jau užimtas! Pasirink kitą.' });
       return;
     }
 
-    // ---- API: viešas turinys ----
-    if (method === 'GET' && pathname === '/api/content') {
-      return sendJson(res, 200, loadData());
-    }
+    gameState.players[socket.id] = { name: trimmed, id: socket.id };
+    if (gameState.scores[socket.id] === undefined) gameState.scores[socket.id] = 0;
+    if (gameState.cheaters[socket.id] === undefined) gameState.cheaters[socket.id] = 0;
+    io.emit('state', getPublicState());
+    socket.emit('joined', { id: socket.id, name: trimmed });
+    // Siusti esama lobby laika naujam zaidejiui
+    socket.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+  });
 
-    // ---- API: prisijungimas ----
-    if (method === 'POST' && pathname === '/api/login') {
-      const body = await parseJsonBody(req);
-      if (body.password === ADMIN_PASSWORD) return sendJson(res, 200, { ok: true });
-      return sendJson(res, 401, { ok: false, error: 'Neteisingas slaptažodis' });
-    }
+  socket.on('host:start', () => startGame());
+  socket.on('host:reveal', () => revealAnswer());
+  socket.on('host:next', () => {
+    if (gameState.questionTimer) { clearInterval(gameState.questionTimer); gameState.questionTimer = null; }
+    nextQuestion();
+  });
 
-    // ---- API: galerija ----
-    if (method === 'POST' && pathname === '/api/gallery') {
-      if (!isAdmin(req)) return sendJson(res, 401, { error: 'Neteisingas slaptažodis' });
-      const parts = await parseMultipartRequest(req, 15 * 1024 * 1024);
-      const beforePart = parts.find(p => p.name === 'before' && p.filename);
-      const afterPart = parts.find(p => p.name === 'after' && p.filename);
-      const altPart = parts.find(p => p.name === 'alt');
-      if (!beforePart || !afterPart) return sendJson(res, 400, { error: 'Reikia abiejų nuotraukų: before ir after' });
-      const data = loadData();
-      const entry = {
-        id: crypto.randomUUID(),
-        before: saveUploadedImage(beforePart, 'before'),
-        after: saveUploadedImage(afterPart, 'after'),
-        alt: (altPart && altPart.data.toString('utf-8')) || 'Automobilis prieš ir po valymo'
-      };
-      data.gallery.push(entry);
-      saveData(data);
-      return sendJson(res, 200, entry);
-    }
+  socket.on('host:prev', () => {
+    if (gameState.questionTimer) { clearInterval(gameState.questionTimer); gameState.questionTimer = null; }
+    gameState.answerRevealed = false; gameState.answers = {};
+    if (gameState.question > 0) { gameState.question--; }
+    else if (gameState.round > 0) { gameState.round--; gameState.question = ROUNDS[gameState.round].questions.length - 1; }
+    startQuestionTimer();
+    io.emit('state', getPublicState());
+  });
 
-    let m = pathname.match(/^\/api\/gallery\/([^/]+)$/);
-    if (method === 'DELETE' && m) {
-      if (!isAdmin(req)) return sendJson(res, 401, { error: 'Neteisingas slaptažodis' });
-      const data = loadData();
-      const entry = data.gallery.find(g => g.id === m[1]);
-      data.gallery = data.gallery.filter(g => g.id !== m[1]);
-      saveData(data);
-      if (entry) {
-        [entry.before, entry.after].forEach(u2 => {
-          const p2 = path.join(UPLOAD_DIR, path.basename(u2));
-          if (fs.existsSync(p2)) fs.unlinkSync(p2);
-        });
-      }
-      return sendJson(res, 200, { ok: true });
-    }
+  socket.on('host:jump', ({ round }) => {
+    if (gameState.questionTimer) { clearInterval(gameState.questionTimer); gameState.questionTimer = null; }
+    gameState.round = round; gameState.question = 0;
+    gameState.answerRevealed = false; gameState.answers = {};
+    startQuestionTimer();
+    io.emit('state', getPublicState());
+  });
 
-    // ---- API: atsiliepimai ----
-    if (method === 'POST' && pathname === '/api/reviews') {
-      if (!isAdmin(req)) return sendJson(res, 401, { error: 'Neteisingas slaptažodis' });
-      const body = await parseJsonBody(req);
-      if (!body.name || !body.text) return sendJson(res, 400, { error: 'Trūksta vardo arba teksto' });
-      const data = loadData();
-      const entry = { id: crypto.randomUUID(), name: body.name, car: body.car || '', text: body.text, stars: Number(body.stars) || 5 };
-      data.reviews.push(entry);
-      saveData(data);
-      return sendJson(res, 200, entry);
+  socket.on('host:adjust', ({ playerId, pts }) => {
+    if (gameState.scores[playerId] !== undefined) {
+      gameState.scores[playerId] = Math.max(0, (gameState.scores[playerId] || 0) + pts);
+      io.emit('state', getPublicState());
     }
+  });
 
-    m = pathname.match(/^\/api\/reviews\/([^/]+)$/);
-    if (method === 'PUT' && m) {
-      if (!isAdmin(req)) return sendJson(res, 401, { error: 'Neteisingas slaptažodis' });
-      const body = await parseJsonBody(req);
-      const data = loadData();
-      const idx = data.reviews.findIndex(r => r.id === m[1]);
-      if (idx === -1) return sendJson(res, 404, { error: 'Nerasta' });
-      data.reviews[idx] = {
-        ...data.reviews[idx],
-        ...(body.name !== undefined ? { name: body.name } : {}),
-        ...(body.car !== undefined ? { car: body.car } : {}),
-        ...(body.text !== undefined ? { text: body.text } : {}),
-        ...(body.stars !== undefined ? { stars: Number(body.stars) } : {})
-      };
-      saveData(data);
-      return sendJson(res, 200, data.reviews[idx]);
-    }
-    if (method === 'DELETE' && m) {
-      if (!isAdmin(req)) return sendJson(res, 401, { error: 'Neteisingas slaptažodis' });
-      const data = loadData();
-      data.reviews = data.reviews.filter(r => r.id !== m[1]);
-      saveData(data);
-      return sendJson(res, 200, { ok: true });
-    }
+  socket.on('host:reset', () => { resetGame(); io.emit('state', getPublicState()); });
 
-    // ---- API: kontaktai ----
-    if (method === 'PUT' && pathname === '/api/contact') {
-      if (!isAdmin(req)) return sendJson(res, 401, { error: 'Neteisingas slaptažodis' });
-      const body = await parseJsonBody(req);
-      const data = loadData();
-      data.contact = {
-        phone: body.phone ?? data.contact.phone,
-        phoneDisplay: body.phoneDisplay ?? data.contact.phoneDisplay,
-        email: body.email ?? data.contact.email,
-        hours: body.hours ?? data.contact.hours
-      };
-      saveData(data);
-      return sendJson(res, 200, data.contact);
-    }
+  socket.on('host:lobby_pause', () => {
+    if (gameState.lobbyTimer) { clearInterval(gameState.lobbyTimer); gameState.lobbyTimer = null; }
+  });
 
-    sendJson(res, 404, { error: 'Nerasta' });
-  } catch (err) {
-    sendJson(res, 500, { error: err.message || 'Serverio klaida' });
-  }
+  socket.on('host:lobby_resume', () => {
+    if (!gameState.lobbyTimer) startLobbyTimer();
+  });
+
+  socket.on('player:answer', ({ optionIndex }) => {
+    if (gameState.phase !== 'question' || gameState.answerRevealed) return;
+    if (!gameState.players[socket.id] || gameState.answers[socket.id]) return;
+    gameState.answers[socket.id] = { optionIndex, name: gameState.players[socket.id].name, time: Date.now() };
+    io.emit('state', getPublicState());
+  });
+
+  // Zaidejas praše esamo laiko (po reconnect)
+  // Host siuncia savo laika - serveris perduoda visiems zaidejams
+  socket.on('host_tick', ({timeLeft}) => {
+    gameState.lobbyTimeLeft = timeLeft;
+    // Perduoti visiems (iskyrus host)
+    socket.broadcast.emit('lobby_timer', { timeLeft });
+  });
+
+  socket.on('get_lobby_time', () => {
+    socket.emit('lobby_timer', { timeLeft: gameState.lobbyTimeLeft });
+  });
+
+  socket.on('player:blur', () => {
+    if (!gameState.players[socket.id]) return;
+    gameState.cheaters[socket.id] = (gameState.cheaters[socket.id] || 0) + 1;
+    const name = gameState.players[socket.id].name;
+    const count = gameState.cheaters[socket.id];
+    io.to('host').emit('cheat_alert', { name, count, id: socket.id });
+    io.emit('state', getPublicState());
+  });
+
+  socket.on('disconnect', () => {
+    if (isHost) {
+      hostConnected = false;
+      console.log('Host atsijunge - laikmatis sustojo');
+    }
+    if (gameState.players[socket.id]) { delete gameState.players[socket.id]; io.emit('state', getPublicState()); }
+  });
 });
 
+// Timer runs always but only counts when host is connected
+startLobbyTimer();;
+
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Eimas Živila backend veikia: http://localhost:${PORT}`);
-  console.log(`Admin panelė: http://localhost:${PORT}/admin.html`);
+  console.log(`\n🎤 Eurovizija Quiz serveris veikia!`);
+  console.log(`   Vedėjas:   http://localhost:${PORT}/host`);
+  console.log(`   Žaidėjai:  http://localhost:${PORT}/`);
+  console.log(`   Nustatymai: http://localhost:${PORT}/settings\n`);
 });
