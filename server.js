@@ -6,10 +6,16 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { exec } = require('child_process');
 const { URL } = require('url');
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'pakeisk-slaptazodi';
+
+// GitHub webhook auto-deploy (palikta suderinama su senu setup'u)
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'eurovizija2026';
+const DEPLOY_DIR = process.env.DEPLOY_DIR || '/var/www/eurovizija';
+const DEPLOY_SERVICE = process.env.DEPLOY_SERVICE || 'eurovizija';
 
 const ROOT = __dirname;
 const DATA_FILE = path.join(ROOT, 'data', 'content.json');
@@ -170,6 +176,23 @@ const server = http.createServer(async (req, res) => {
       const safe = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
       const candidate = path.join(PUBLIC_DIR, safe);
       if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return sendFile(res, candidate);
+    }
+
+    // ---- GitHub webhook: automatinis atnaujinimas po push ----
+    if (method === 'POST' && pathname === '/webhook') {
+      const raw = await collectBody(req, 5 * 1024 * 1024);
+      const sig = req.headers['x-hub-signature-256'];
+      const hmac = 'sha256=' + crypto.createHmac('sha256', WEBHOOK_SECRET).update(raw).digest('hex');
+      const sigBuf = Buffer.from(sig || '');
+      const hmacBuf = Buffer.from(hmac);
+      const valid = sig && sigBuf.length === hmacBuf.length && crypto.timingSafeEqual(sigBuf, hmacBuf);
+      if (!valid) { res.writeHead(403); return res.end('Forbidden'); }
+      res.writeHead(200); res.end('OK');
+      exec(`cd ${DEPLOY_DIR} && git pull origin main && systemctl restart ${DEPLOY_SERVICE}`, (err, stdout, stderr) => {
+        if (err) console.error('Webhook klaida:', err.message, stderr);
+        else console.log('Auto-update:', stdout);
+      });
+      return;
     }
 
     // ---- API: viešas turinys ----
