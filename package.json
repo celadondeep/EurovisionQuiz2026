@@ -1,10 +1,13 @@
 {
-  "name": "eimas-zivila-backend",
+  "name": "eurovizija-quiz",
   "version": "1.0.0",
-  "description": "Eimas Zivila Auto Detailing - be joki\u0173 i\u0161orini\u0173 paket\u0173, tik built-in Node.js moduliai",
+  "description": "Realaus laiko Eurovizijos viktorina",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
 }
