@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Eimas Živila Auto Detailing</title>
+<style>
+    :root {
+        --red: #e10600;
+        --red-hover: #ff1f1a;
+        --red-soft: rgba(225, 6, 0, 0.14);
+        --bg: #0a0a0c;
+        --bg-alt: #131316;
+        --card: #1a1a1e;
+        --border: #2a2a2e;
+        --text: #f5f5f6;
+        --text-dim: #a3a3a8;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+    }
+    header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    header h1 { font-size: 18px; margin: 0; }
+    header h1 span { color: var(--red); }
+    #logoutBtn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: none;
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+    /* Login */
+    #loginScreen {
+        max-width: 360px;
+        margin: 80px auto;
+        text-align: center;
+    }
+    #loginScreen p { color: var(--text-dim); margin-bottom: 24px; }
+    input, textarea, select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text);
+        font-size: 15px;
+        margin-bottom: 10px;
+        font-family: inherit;
+    }
+    textarea { resize: vertical; min-height: 70px; }
+    button.primary {
+        background: var(--red);
+        color: #fff;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+    }
+    button.primary:hover { background: var(--red-hover); }
+    #loginError { color: var(--red-hover); margin-top: 10px; min-height: 20px; font-size: 14px; }
+
+    /* App */
+    #app { display: none; }
+    section.panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 24px;
+    }
+    section.panel h2 { margin-top: 0; font-size: 18px; }
+    .hint { color: var(--text-dim); font-size: 13px; margin-bottom: 16px; }
+
+    .gallery-grid, .review-list { display: grid; gap: 14px; }
+    .gallery-item, .review-item {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+    }
+    .gallery-item img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; }
+    .gallery-item .imgs { display: flex; gap: 6px; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-info b { display: block; }
+    .item-info span { color: var(--text-dim); font-size: 13px; }
+    .del-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--red-hover);
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .del-btn:hover { background: var(--red-soft); }
+
+    form.inline-form { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--border); }
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; }
+    label { font-size: 13px; color: var(--text-dim); display: block; margin-bottom: 4px; }
+    .field { margin-bottom: 12px; }
+    .stars-select { width: 120px; }
+    .status-msg { font-size: 13px; margin-top: 8px; min-height: 18px; }
+    .status-msg.ok { color: #4caf50; }
+    .status-msg.err { color: var(--red-hover); }
+    button.secondary {
+        background: transparent;
+        border: 1px solid var(--red);
+        color: var(--red-hover);
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    button.secondary:hover { background: var(--red-soft); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Eimas Živila <span>Admin</span></h1>
+    <button id="logoutBtn">Atsijungti</button>
+</header>
+
+<main>
+    <div id="loginScreen">
+        <h2>Prisijungimas</h2>
+        <p>Įveskite administratoriaus slaptažodį.</p>
+        <input type="password" id="pwInput" placeholder="Slaptažodis" autofocus>
+        <button class="primary" id="loginBtn">Prisijungti</button>
+        <div id="loginError"></div>
+    </div>
+
+    <div id="app">
+
+        <!-- GALERIJA -->
+        <section class="panel">
+            <h2>Galerija — prieš / po nuotraukos</h2>
+            <p class="hint">Įkelkite naują porą nuotraukų arba pašalinkite esamą. Nuotraukos automatiškai suspaudžiamos.</p>
+            <div class="gallery-grid" id="galleryList"></div>
+
+            <form class="inline-form" id="galleryForm">
+                <div class="field">
+                    <label>Aprašymas (pvz. „Salonas", „Kėbulas")</label>
+                    <input type="text" id="galleryAlt" placeholder="Automobilis prieš ir po valymo">
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label>Nuotrauka „Prieš"</label>
+                        <input type="file" id="galleryBefore" accept="image/*" required>
+                    </div>
+                    <div class="field">
+                        <label>Nuotrauka „Po"</label>
+                        <input type="file" id="galleryAfter" accept="image/*" required>
+                    </div>
+                </div>
+                <button class="secondary" type="submit">+ Pridėti porą</button>
+                <div class="status-msg" id="galleryStatus"></div>
+            </form>
+        </section>
+
+        <!-- ATSILIEPIMAI -->
+        <section class="panel">
+            <h2>Atsiliepimai</h2>
+            <p class="hint">Pridėkite, redaguokite arba pašalinkite klientų atsiliepimus.</p>
+            <div class="review-list" id="reviewList"></div>
+
+            <form class="inline-form" id="reviewForm">
+                <div class="row">
+                    <div class="field">
+                        <label>Vardas</label>
+                        <input type="text" id="reviewName" placeholder="Vardas" required>
+                    </div>
+                    <div class="field">
+                        <label>Automobilis</label>
+                        <input type="text" id="reviewCar" placeholder="pvz. BMW 520">
+                    </div>
+                    <div class="field stars-select">
+                        <label>Žvaigždutės</label>
+                        <select id="reviewStars">
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★</option>
+                            <option value="3">★★★</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Atsiliepimo tekstas</label>
+                    <textarea id="reviewText" placeholder="Kliento atsiliepimas..." required></textarea>
+                </div>
+                <button class="secondary" type="submit">+ Pridėti atsiliepimą</button>
+                <div class="status-msg" id="reviewStatus"></div>
+            </form>
+        </section>
+
+        <!-- KONTAKTAI -->
+        <section class="panel">
+            <h2>Kontaktinė informacija</h2>
+            <p class="hint">Šie duomenys atsinaujina visoje svetainėje (telefonas, el. paštas, darbo laikas).</p>
+            <form id="contactForm">
+                <div class="field">
+                    <label>Telefonas (rodomas tekstas)</label>
+                    <input type="text" id="contactPhoneDisplay" placeholder="+370 663 17114">
+                </div>
+                <div class="field">
+                    <label>Telefonas (tel: nuorodai, be tarpų)</label>
+                    <input type="text" id="contactPhone" placeholder="+37066317114">
+                </div>
+                <div class="field">
+                    <label>El. paštas</label>
+                    <input type="email" id="contactEmail" placeholder="eimas.ziv@gmail.com">
+                </div>
+                <div class="field">
+                    <label>Darbo laikas</label>
+                    <input type="text" id="contactHours" placeholder="Individualiai pagal susitarimą">
+                </div>
+                <button class="secondary" type="submit">Išsaugoti kontaktus</button>
+                <div class="status-msg" id="contactStatus"></div>
+            </form>
+        </section>
+
+    </div>
+</main>
+
+<script>
+    let ADMIN_PW = sessionStorage.getItem('adminPw') || '';
+
+    const loginScreen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function showApp() {
+        loginScreen.style.display = 'none';
+        app.style.display = 'block';
+        logoutBtn.style.display = 'inline-block';
+        loadAll();
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', tryLogin);
+    document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+    async function tryLogin() {
+        const pw = document.getElementById('pwInput').value;
+        const errEl = document.getElementById('loginError');
+        errEl.textContent = '';
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pw })
+            });
+            if (!res.ok) { errEl.textContent = 'Neteisingas slaptažodis'; return; }
+            ADMIN_PW = pw;
+            sessionStorage.setItem('adminPw', pw);
+            showApp();
+        } catch (e) {
+            errEl.textContent = 'Nepavyko prisijungti prie serverio';
+        }
+    }
+
+    logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('adminPw');
+        location.reload();
+    });
+
+    function authHeaders(extra) {
+        return Object.assign({ 'x-admin-password': ADMIN_PW }, extra || {});
+    }
+
+    async function loadAll() {
+        const res = await fetch('/api/content', { cache: 'no-store' });
+        const data = await res.json();
+        renderGallery(data.gallery || []);
+        renderReviews(data.reviews || []);
+        renderContact(data.contact || {});
+    }
+
+    // ---------- Galerija ----------
+    function renderGallery(items) {
+        const wrap = document.getElementById('galleryList');
+        if (!items.length) { wrap.innerHTML = '<p class="hint">Galerijoje dar nėra nuotraukų.</p>'; return; }
+        wrap.innerHTML = items.map(item => `
+            <div class="gallery-item">
+                <div class="imgs">
+                    <img src="${item.before}" alt="prieš">
+                    <img src="${item.after}" alt="po">
+                </div>
+                <div class="item-info"><b>${item.alt || ''}</b><span>ID: ${item.id.slice(0,8)}</span></div>
+                <button class="del-btn" data-id="${item.id}" data-type="gallery">Šalinti</button>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('galleryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusEl = document.getElementById('galleryStatus');
+        statusEl.textContent = 'Įkeliama...'; statusEl.className = 'status-msg';
+        const fd = new FormData();
+        fd.append('alt', document.getElementById('galleryAlt').value);
+        fd.append('before', document.getElementById('galleryBefore').files[0]);
+        fd.append('after', document.getElementById('galleryAfter').files[0]);
+        try {
+            const res = await fetch('/api/gallery', { method: 'POST', headers: authHeaders(), body: fd });
+            const j = await res.json();
+            if (!res.ok) throw new Error(j.error || 'Klaida');
+            statusEl.textContent = 'Pridėta!'; statusEl.className = 'status-msg ok';
+            e.target.reset();
+            loadAll();
+        } catch (err) {
+            statusEl.textContent = err.message; statusEl.className = 'status-msg err';
+        }
+    });
+
+    // ---------- Atsiliepimai ----------
+    function renderReviews(items) {
+        const wrap = document.getElementById('reviewList');
+        if (!items.length) { wrap.innerHTML = '<p class="hint">Atsiliepimų dar nėra.</p>'; return; }
+        wrap.innerHTML = items.map(r => `
+            <div class="review-item">
+                <div class="item-info">
+                    <b>${r.name}${r.car ? ' · ' + r.car : ''} ${'★'.repeat(r.stars || 5)}</b>
+                    <span>${r.text}</span>
+                </div>
+                <button class="del-btn" data-id="${r.id}" data-type="review">Šalinti</button>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusEl = document.getElementById('reviewStatus');
+        statusEl.textContent = 'Saugoma...'; statusEl.className = 'status-msg';
+        const body = {
+            name: document.getElementById('reviewName').value,
+            car: document.getElementById('reviewCar').value,
+            stars: document.getElementById('reviewStars').value,
+            text: document.getElementById('reviewText').value
+        };
+        try {
+            const res = await fetch('/api/reviews', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) });
+            const j = await res.json();
+            if (!res.ok) throw new Error(j.error || 'Klaida');
+            statusEl.textContent = 'Pridėta!'; statusEl.className = 'status-msg ok';
+            e.target.reset();
+            loadAll();
+        } catch (err) {
+            statusEl.textContent = err.message; statusEl.className = 'status-msg err';
+        }
+    });
+
+    // ---------- Trynimas (bendras handleris) ----------
+    document.addEventListener('click', async (e) => {
+        if (!e.target.classList.contains('del-btn')) return;
+        const id = e.target.dataset.id;
+        const type = e.target.dataset.type;
+        if (!confirm('Ar tikrai norite pašalinti?')) return;
+        const url = type === 'gallery' ? `/api/gallery/${id}` : `/api/reviews/${id}`;
+        await fetch(url, { method: 'DELETE', headers: authHeaders() });
+        loadAll();
+    });
+
+    // ---------- Kontaktai ----------
+    function renderContact(c) {
+        document.getElementById('contactPhoneDisplay').value = c.phoneDisplay || '';
+        document.getElementById('contactPhone').value = c.phone || '';
+        document.getElementById('contactEmail').value = c.email || '';
+        document.getElementById('contactHours').value = c.hours || '';
+    }
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusEl = document.getElementById('contactStatus');
+        statusEl.textContent = 'Saugoma...'; statusEl.className = 'status-msg';
+        const body = {
+            phoneDisplay: document.getElementById('contactPhoneDisplay').value,
+            phone: document.getElementById('contactPhone').value,
+            email: document.getElementById('contactEmail').value,
+            hours: document.getElementById('contactHours').value
+        };
+        try {
+            const res = await fetch('/api/contact', { method: 'PUT', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) });
+            if (!res.ok) throw new Error('Klaida saugant');
+            statusEl.textContent = 'Išsaugota!'; statusEl.className = 'status-msg ok';
+        } catch (err) {
+            statusEl.textContent = err.message; statusEl.className = 'status-msg err';
+        }
+    });
+
+    // Auto-login jei slaptažodis jau išsaugotas šioje sesijoje
+    if (ADMIN_PW) {
+        fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: ADMIN_PW }) })
+            .then(res => { if (res.ok) showApp(); });
+    }
+</script>
+
+</body>
+</html>
